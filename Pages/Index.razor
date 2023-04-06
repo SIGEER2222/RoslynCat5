@@ -1,0 +1,81 @@
+﻿@page "/"
+@using RoslynCat.Data
+
+<body class="theme-dark root-status-default">
+    <main>
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <p>分享地址已复制到剪切板：@shareId</p>
+            </div>
+        </div>
+        <button class="mobile-settings-button" aria-label="Settings" tabindex="1"></button><div class="mobile-offline-notice">connection lost, reconnecting…</div>
+        <div class="top-section-group top-section-group-code">
+            <section class="top-section code">
+                <header>
+                    <h1>Chooes-Language</h1>
+                    <div class="select-wrapper option-language option online-only">
+                        <select aria-label="Code Language" tabindex="1"><option value="C#">C#</option>
+                            <option value="Visual Basic">Visual Basic</option>
+                            <option value="F#">F#</option>
+                        </select>
+                    </div>
+                    <button @onclick="Test">测试</button>
+                    @*<button @onclick="CodeSharing">分享代码</button>*@
+                    <button @onclick=" ()=> share = s ">@share</button>
+                    <label> @shareId</label>
+                </header>
+                <div id="@editorId" class="monaco"></div>
+            </section>
+        </div>
+        <div class="top-section-group top-section-group-results">
+            <section class="top-section result">
+                <header>
+                    <h1>Output</h1>
+                    <div class="select-wrapper option-target option online-only">
+                        <select aria-label="Output Mode" tabindex="4">
+                            <optgroup label="Decompile"><option value="C#">C#</option><option value="IL">IL</option></optgroup>
+                            @*<optgroup label="Other"><option value="AST">Syntax Tree</option><option value="Verify">Verify Only</option><option value="Explain">Explain</option></optgroup>*@
+                            <optgroup label="Experimental"><option value="Run">Run</option></optgroup></select>
+                    </div>
+                    <h1>编译模式</h1>
+                    <div class="select-wrapper option-language option online-only">
+                        <select aria-label="Code Language" tabindex="1">
+                            <option value="option">手动</option>
+                            <option value="auto">自动</option>
+                        </select>
+                    </div>
+                </header>
+                <div class="content">
+                    <div class="CodeMirror cm-s-default mirrorsharp-theme">
+                        <div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 291.95px; left: 30.3899px;">
+                            <textarea autocorrect="off" autocapitalize="off" spellcheck="false" readonly="" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"> </textarea>
+                        </div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true">
+                            <div style="min-width: 1px; height: 0px;"></div>
+                        </div>
+                        @*<div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="display: block; right: 0px; left: 0px;">
+                            <div style="height: 100%; min-height: 1px; width: 1780.6px;"></div>
+                        </div>*@
+                        @*<div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div>*@
+                        <div> @result</div>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer>
+        <div class="cm6-preview-manager block-with-label">
+            <label for=":r0:">Editor:</label>
+            <button id=":r0:" aria-label="Editor Toggle, Current: Default">Default</button>
+        </div><div class="mobile-font-size-manager block-with-label"><label for=":r1:">Font Size:</label><button id=":r1:" aria-label="Font Size Toggle, Current: M">M</button></div>
+    </footer>
+</body>
+
+@code {
+    private readonly string editorId = Data.Constants.csharpId;
+    private string code { get; set; } = Data.Constants.defultCode;
+    private string share {get;set;} = "分享代码";
+    private string @s {get;set;} = "开发中……";
+    
+}
