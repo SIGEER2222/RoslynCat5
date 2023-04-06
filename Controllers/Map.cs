@@ -20,6 +20,17 @@ namespace RoslynCat.Controllers
             return group;
         }
 
+        public static RouteGroupBuilder MapShare(this RouteGroupBuilder group) {
+            group.MapPost("/share/{0}",async (http) =>
+            {
+                string gistID = http.Request.Path.Value.Split('/').Last();
+                CodeSharing sharing = new CodeSharing();
+                string code = await sharing.GetGistContentAsync(gistID);
+                http.Response.StatusCode = 204;
+                return;
+            });
+            return group;
+        }
         private static async Task Completion(HttpContext http) {
 
             if (http.Request.Body is null) {

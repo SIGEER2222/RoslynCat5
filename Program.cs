@@ -1,6 +1,7 @@
 using RoslynCat.Roslyn;
 using RoslynCat.Controllers;
-using RoslynCat.Interface;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,19 +10,22 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddTransient<Compiler>();
 
 builder.Services.AddControllers();
-
-builder.Services.AddTransient<ICompleteProvider,CompletionProvider>();
-//builder.Services.AddTransient<ISignatureProvider,SignatureProvider>();
-builder.Services.AddTransient<IHoverProvider,HoverProvider>();
-builder.Services.AddTransient<ICodeCheckProvider,CodeCheckProvider>();
-builder.Services.AddTransient<CompletionDocument>();
-
-Console.WriteLine(builder.Services.Any(d => d.ServiceType == typeof(ICompleteProvider)));
-var app = builder.Build();                              
+builder.Services.AddSwaggerGen();
+//builder.Services.AddTransient<CompletionDocument>();
+//builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+//builder.Host.ConfigureContainer<ContainerBuilder>(builder => builder.RegisterModule(new MyApplicationModule()));
+var app = builder.Build();
+//builder.Services.AddControllersWithViews()
 
 if (!app.Environment.IsDevelopment()) {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+//开发环境下使用swagger
+if (app.Environment.IsDevelopment()) {
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
@@ -35,12 +39,4 @@ app.MapFallbackToPage("/_Host");
 
 app.MapGroup("/completion").MapTodosApi();
 //app.MapGet("/",() => "Hello World!");
-
 app.Run();
-
-//static IHostBuilder CreateHostBuilder(string[] args) =>
-//    Host.CreateDefaultBuilder(args)
-//        .ConfigureServices((_,services) =>
-//            services.AddTransient<ICompleteProvider,CompletionProvider>()
-//                    .AddTransient<IHoverProvider,HoverProvider>()
-//                    .AddTransient<ICodeCheckProvider,CodeCheckProvider>());

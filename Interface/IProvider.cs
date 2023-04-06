@@ -13,7 +13,7 @@ namespace RoslynCat.Interface
     }
     public interface ISignatureProvider : IProvider<SignatureHelpResult>
     {
-        public Task<CompletionResult> Provide(Document document,int positionm,SemanticModel semanticModel);
+        public Task<SignatureHelpResult> Provide(Document document,int positionm,SemanticModel semanticModel);
     }
 
     public interface IHoverProvider : IProvider<HoverInfoResult>

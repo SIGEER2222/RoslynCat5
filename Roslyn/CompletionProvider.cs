@@ -49,7 +49,7 @@ namespace RoslynCat.Roslyn
                 VariableDeclaratorSyntax vd => semanticModel.GetTypeInfo(vd.ChildNodes().FirstOrDefault()?.ChildNodes().FirstOrDefault()).Type.ToString(),
                 PropertyDeclarationSyntax prop => prop.Type.ToString(),
                 ParameterSyntax param => param.Type.ToString(),
-                IdentifierNameSyntax Identifier => semanticModel.GetTypeInfo(Identifier).Type.ToString(),
+                //IdentifierNameSyntax Identifier => semanticModel.GetTypeInfo(Identifier).Type.ToString(),
                 SyntaxNode s => HoverInfoBuilder.Build(semanticModel.GetSymbolInfo(s)),
                 _ => string.Empty
             };

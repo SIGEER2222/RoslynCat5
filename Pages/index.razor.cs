@@ -12,6 +12,7 @@ namespace RoslynCat.Pages
     {
         public List<Diagnostic> Diagnostics { get; set; }
         [Inject] Compiler CompliterService { get; set; }
+        //[Inject] CompletionDocument doc { get; set; }
         [Inject] IJSRuntime JS { get; set; }
         private string result = "µÈ´ý±àÒë...";
         private string shareId = string.Empty;
@@ -26,6 +27,7 @@ namespace RoslynCat.Pages
                 JsRuntimeExt.Shared = JS;
                 await JsRuntimeExt.Shared.CreateMonacoEditorAsync(editorId,code);
                 await CompliterService.CreatCompilation(code);
+                //doc.Test();
             }
         }
 

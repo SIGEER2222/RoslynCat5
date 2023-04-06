@@ -37,8 +37,16 @@ monacoInterop.createEditor = (elementId, code) => {
 
 monacoInterop.CSharpRegister = (elementId) => {
     let languageId = "csharp";
-    monaco.editor.onDidCreateModel(languageId, {
 
+    monaco.editor.onDidCreateModel(function (model) {
+        var handle = null;
+        model.onDidChangeContent(() => {
+            console.log("ondi")
+            monaco.editor.setModelMarkers(model, 'csharp', []);
+            clearTimeout(handle);
+            handle = setTimeout(() => module.validate(),500);
+        });
+        module.validate();
     })
     monaco.languages.registerCompletionItemProvider(languageId, {
         triggerCharacters: [".", " "],

@@ -15,7 +15,7 @@ namespace RoslynCat.Roslyn
         private AdhocWorkspace _workspace;
         private List<MetadataReference> _metadataReferences;
 
-        [Inject] public CompletionDocument CompletionDocument { get; set; }
+        public CompletionDocument completionDocument { get; set; }
 
         public static MetadataReference[] DefaultMetadataReferences = new MetadataReference[]
         {
@@ -68,8 +68,10 @@ namespace RoslynCat.Roslyn
                 );
             var result = compilation.Emit("temp");
             SemanticModel semanticModel = compilation.GetSemanticModel(st, true);
-            CompletionDocument.CreateDocument(document,semanticModel,result);
-            return CompletionDocument;
+            completionDocument = new();
+            //CompletionDocument.CreateDocument(document,semanticModel,result);
+            completionDocument.CreateDocument(document,semanticModel,result);
+            return completionDocument;
         }
 
     }

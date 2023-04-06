@@ -106,52 +106,6 @@ export async function provideCompletionItems(model, position){
     return { suggestions: suggestions };
 }
 
-//// 实现自动完成逻辑
-//export async function provideCompletionItems(model, position) {
-
-//    const word = model.getWordUntilPosition(position);
-//    const range = {
-//        startLineNumber: position.lineNumber,
-//        endLineNumber: position.lineNumber,
-//        startColumn: word.startColumn,
-//        endColumn: word.endColumn,
-//    };
-//    const suggestions = [];
-
-//    let request = {
-//        SourceCode: model.getValue(),
-//        Position: model.getOffsetAt(position),
-//        Assemblies: assemblies
-//    }
-//    let resultQ = await sendRequest("complete", request);
-
-//    for (let elem of resultQ.data) {
-//        suggestions.push({
-//            label: {
-//                label: elem.Suggestion,
-//                description: elem.Description
-//            },
-//            kind: monaco.languages.CompletionItemKind.Function,
-//            insertText: elem.Suggestion
-//        });
-//    }
-//    // 添加自动完成项
-//    suggestions.push({
-//        label: "Console",
-//        kind: monaco.languages.CompletionItemKind.Class,
-//        documentation: "Represents the standard input, output, and error streams.",
-//        insertText: "Console",
-//    });
-//    suggestions.push({
-//        label: "DateTime",
-//        kind: monaco.languages.CompletionItemKind.Class,
-//        documentation:
-//            "Represents an instant in time, typically expressed as a date and time of day.",
-//        insertText: "DateTime",
-//    });
-//    return { suggestions: suggestions, incomplete: true };
-//}
-
 //提示信息
 export async function validate() {
 
