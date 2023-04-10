@@ -15,8 +15,6 @@ namespace RoslynCat.Roslyn
         private AdhocWorkspace _workspace;
         private List<MetadataReference> _metadataReferences;
 
-        public CompletionDocument completionDocument { get; set; }
-
         public static MetadataReference[] DefaultMetadataReferences = new MetadataReference[]
         {
             MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
@@ -34,6 +32,7 @@ namespace RoslynCat.Roslyn
             MetadataReference.CreateFromFile(typeof(System.Linq.Expressions.Expression).Assembly.Location)
         };
 
+       
         public static CompletionWorkspace Create(List<string> usings) {
             Assembly[] lst = new[] {
                 Assembly.Load("Microsoft.CodeAnalysis.Workspaces"),
@@ -58,21 +57,19 @@ namespace RoslynCat.Roslyn
             return new CompletionWorkspace() { _workspace = workspace,_project = project,_metadataReferences = references };
         }
 
-        public async Task<CompletionDocument> CreateDocument(string code) {
-            var document = _workspace.AddDocument(_project.Id, "MyFile2.cs", SourceText.From(code));
-            var st = await document.GetSyntaxTreeAsync();
-            var compilation =CSharpCompilation.Create("Temp",
-                    new[] { st },
-                    options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary),
-                    references: _metadataReferences
-                );
-            var result = compilation.Emit("temp");
-            SemanticModel semanticModel = compilation.GetSemanticModel(st, true);
-            completionDocument = new();
-            //CompletionDocument.CreateDocument(document,semanticModel,result);
-            completionDocument.CreateDocument(document,semanticModel,result);
-            return completionDocument;
-        }
+        //public async Task<CompletionDocument> CreateDocument(string code) {
+        //    var document = _workspace.AddDocument(_project.Id, "MyFile2.cs", SourceText.From(code));
+        //    var st = await document.GetSyntaxTreeAsync();
+        //    var compilation =CSharpCompilation.Create("Temp",
+        //            new[] { st },
+        //            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary),
+        //            references: _metadataReferences
+        //        );
+        //    var result = compilation.Emit("temp");
 
+        //    SemanticModel semanticModel = compilation.GetSemanticModel(st, true);
+        //    completionDocument = completionDocument.CreateDocument(document,semanticModel,result);
+        //    return completionDocument;
+        //}
     }
 }

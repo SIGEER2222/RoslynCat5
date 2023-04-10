@@ -22,6 +22,6 @@ namespace RoslynCat.Interface
     }
     public interface ICodeCheckProvider : IProvider<CodeCheckResult>
     {
-        public Task<CodeCheckResult> Provide(EmitResult emitResult,Document document,CancellationToken cancellationToken);
+        public Task<CodeCheckResult> Provide(EmitResult emitResult,Document document);
     }
 }

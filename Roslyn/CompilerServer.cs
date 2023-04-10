@@ -28,12 +28,8 @@ namespace RoslynCat.Roslyn
             var workspace = new AdhocWorkspace();
 
             // 创建一个项目信息对象
-            var projectInfo = ProjectInfo.Create(
-            ProjectId.CreateNewId(),
-            VersionStamp.Create(),
-            "MyProject",
-            "MyAssembly.dll",
-            LanguageNames.CSharp);
+            var projectInfo = ProjectInfo.Create(ProjectId.CreateNewId(),VersionStamp.Create(),
+                "MyProject","MyAssembly.dll",LanguageNames.CSharp);
 
             // 将项目信息对象添加到工作区中
             workspace.AddProject(projectInfo);

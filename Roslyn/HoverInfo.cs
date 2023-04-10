@@ -15,20 +15,13 @@ namespace RoslynCat.Roslyn
                 _ => string.Empty
             };
 
-            private static string BuildMethodSymbol(IMethodSymbol symbol) {
-                var xml = symbol.GetDocumentationCommentXml();
-                var doc = XDocument.Parse(xml);
-                var summary = doc.Descendants("summary").FirstOrDefault();
-                string accessibility = symbol.DeclaredAccessibility.ToString().ToLower();
-                string isStatic = symbol.IsStatic ? "static " : "";
-                string parameters = string.Join(", ", symbol.Parameters.Select(p => $"{p.Type} {p.Name}"));
-                return $"(method) {accessibility} {isStatic}{symbol.Name}({parameters}) : {symbol.ReturnType}";
+            private static string BuildMethodSymbol(IMethodSymbol methodSymbol) {
+                var parameters = string.Join(", ", methodSymbol.Parameters.Select(p => $"{p.Type} {p.Name}"));
+                return $"(method) {methodSymbol.DeclaredAccessibility.ToString().ToLower()} {(methodSymbol.IsStatic ? "static " : "")}{methodSymbol.Name}({parameters}) : {methodSymbol.ReturnType}";
             }
 
-            private static string BuildLocalSymbol(ILocalSymbol symbol) {
-                string isConst = symbol.IsConst ? "const " : "";
-                Console.WriteLine();
-                return $"{symbol.Name} : {isConst}{symbol.Type}";
+            private static string BuildLocalSymbol(ILocalSymbol localSymbol) {
+                return $"{localSymbol.Name} : {(localSymbol.IsConst ? "const " : "")}{localSymbol.Type}";
             }
 
             private static string BuildLocalSymbol(IFieldSymbol symbol) {

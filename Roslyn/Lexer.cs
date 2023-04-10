@@ -18,5 +18,6 @@ namespace RoslynCat.Roslyn
                 .OfType <TypeDeclarationSyntax>().Select(t => t.Identifier.Text).Distinct().ToList();
             return types;
         }
+
     }
 }

@@ -5,12 +5,12 @@ namespace RoslynCat.Data
 {
     public class CompletionResult : IResponse
     {
-        private static readonly CompletionResult instance = new CompletionResult();
+        //private static readonly CompletionResult instance = new CompletionResult();
 
-        public static CompletionResult GetInstance() {
-            return instance;
-        }
-        private CompletionResult() { }
+        //public static CompletionResult GetInstance() {
+        //    return instance;
+        //}
+        public CompletionResult() { }
 
         public static ConcurrentDictionary<string,string> Suggestions { get; set; }
     }

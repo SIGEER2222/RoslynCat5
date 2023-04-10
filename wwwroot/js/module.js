@@ -3,17 +3,27 @@ let assemblies = null;
 
 async function sendRequest(type, request) {
     let endPoint;
+    const headers = {
+        'Content-Type': 'application/json'
+    };
     switch (type) {
         case 'complete': endPoint = '/completion/complete'; break;
         case 'signature': endPoint = '/completion/signature'; break;
         case 'hover': endPoint = '/completion/hover'; break;
         case 'codeCheck': endPoint = '/completion/codeCheck'; break;
     }
-    return await axios.post(endPoint, JSON.stringify(request))
+    // Ìí¼ÓÇëÇóÀ¹½ØÆ÷
+    axios.interceptors.request.use(request => {
+        console.log('Starting Request', request)
+        return request
+    });
+
+    const response = await axios.post(endPoint, request);
+    console.log(response)
+    return response.data;
 }
 
 export async function provideHover(model, position) {
-    console.log(axios);
     let request = {
         SourceCode: model.getValue(),
         Position: model.getOffsetAt(position),
@@ -86,7 +96,6 @@ export async function provideCompletionItems(model, position){
         Assemblies: assemblies
     }
     console.log("provideCompletionItems")
-    console.log(request)
 
     let resultQ = await sendRequest("complete", request);
 
