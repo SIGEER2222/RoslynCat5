@@ -17,12 +17,13 @@ builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGenNewtonsoftSupport();
 builder.Services.AddTransient<Compiler>();
-builder.Services.AddScoped<IWorkSpaceService,WorkSpaceService>();
-builder.Services.AddScoped<ICompleteProvider,CompleteProvider>();
+builder.Services.AddTransient<WorkSpaceService>();
+builder.Services.AddTransient<IWorkSpaceService,WorkSpaceService>();
+builder.Services.AddTransient<ICompleteProvider,CompleteProvider>();
 //builder.Services.AddScoped<ISignatureProvider,SignatureProvider>();
-builder.Services.AddScoped<IHoverProvider,HoverProvider>();
-builder.Services.AddScoped<ICodeCheckProvider,CodeCheckProvider>();
-builder.Services.AddScoped< CompletionProvider>();
+builder.Services.AddTransient<IHoverProvider,HoverProvider>();
+builder.Services.AddTransient<ICodeCheckProvider,CodeCheckProvider>();
+builder.Services.AddTransient< CompletionProvider>();
 
 //builder.Services.AddSwaggerGen(swagger =>
 //{

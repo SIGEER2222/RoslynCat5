@@ -24,12 +24,12 @@ namespace RoslynCat.Roslyn
         }
 
         public async Task<CompletionProvider> CreateProviderAsync(IWorkSpaceService workSpace, SourceInfo sourceInfo) {
+            workSpace.OnDocumentChange(sourceInfo.SourceCode);
             document      = workSpace.Document;
             semanticModel = await workSpace.GetSmanticModelAsync();
             emitResult    = await workSpace.GetEmitResultAsync();
             position      = sourceInfo.Position;
             type          = sourceInfo.Type;
-            workSpace.OnDocumentChange(sourceInfo.SourceCode);
             return this;
         }
 

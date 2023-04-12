@@ -12,7 +12,7 @@ namespace RoslynCat.Data
         //}
         public CompletionResult() { }
 
-        public static ConcurrentDictionary<string,string> Suggestions { get; set; }
+        public ConcurrentDictionary<string,string> Suggestions { get; set; }
     }
     public class HoverInfoResult : IResponse
     {

@@ -7,6 +7,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Xml;
 using Microsoft.Extensions.DependencyInjection;
+using System.Numerics;
+
 namespace RoslynCat.Roslyn
 {
     public class CompletionWorkspace
@@ -29,7 +31,8 @@ namespace RoslynCat.Roslyn
             MetadataReference.CreateFromFile(typeof(DataSet).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(XmlDocument).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(INotifyPropertyChanged).Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(System.Linq.Expressions.Expression).Assembly.Location)
+            MetadataReference.CreateFromFile(typeof(System.Linq.Expressions.Expression).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(BigInteger).Assembly.Location),
         };
 
        

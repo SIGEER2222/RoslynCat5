@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using RoslynCat.Interface;
 using System.Collections.Concurrent;
 using static RoslynCat.Roslyn.HoverInfo;
@@ -10,9 +11,18 @@ namespace RoslynCat.Roslyn
     {
         // Thanks to https://www.strathweb.com/2018/12/using-roslyn-c-completion-service-programmatically/
         public async Task<CompletionResult> Provide(Document document,int position) {
+
             var dict = new ConcurrentDictionary<string, string>();
             var completionService = CompletionService.GetService(document);
-            CompletionList results = await completionService.GetCompletionsAsync(document, position);
+            CompletionList results = completionService.GetCompletionsAsync(document, position).Result;
+
+            //var syntaxTree = document.GetSyntaxTreeAsync().Result;
+            //var root = syntaxTree.GetRoot();
+            //var node = root.FindNode(new TextSpan(position, 0));
+
+            if (results is null) {
+                return new CompletionResult();
+            }
             var items = results.ItemsList;
 
             //Parallel.ForEach(items,async x => {
@@ -26,8 +36,9 @@ namespace RoslynCat.Roslyn
                 dict.TryAdd(x.DisplayText,description.Text);
             }));
 
-            CompletionResult result = new CompletionResult();
-            CompletionResult.Suggestions = dict;
+            CompletionResult result = new CompletionResult(){
+                Suggestions = dict,
+            };
             return result;
         }
     }

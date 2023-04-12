@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynCat", "RoslynCat.cspr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "..\ConsoleApp1\ConsoleApp1.csproj", "{186C55CF-BB8C-4A51-9689-29485B1303D6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynCatClient", "..\RoslynCatClient\RoslynCatClient.csproj", "{4F999148-9EDF-4300-80B3-762436A70A94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{186C55CF-BB8C-4A51-9689-29485B1303D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{186C55CF-BB8C-4A51-9689-29485B1303D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{186C55CF-BB8C-4A51-9689-29485B1303D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F999148-9EDF-4300-80B3-762436A70A94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F999148-9EDF-4300-80B3-762436A70A94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F999148-9EDF-4300-80B3-762436A70A94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F999148-9EDF-4300-80B3-762436A70A94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -38,6 +38,10 @@ namespace RoslynCat.Controllers
         } 
         public static async Task CopyUrl(this IJSRuntime js) {
             await js.SafeInvokeAsync("monacoInterop.copyText");
+        } 
+        
+        public static async Task RegisterMonacoProviders(this IJSRuntime js,string languageId) {
+            await js.SafeInvokeAsync("monacoInterop.copyText");
         }
 
         // public static async Task CreateMonacoEditorAsync(this IJSRuntime jsRuntime, string editorId, Dictionary<string, object> options)

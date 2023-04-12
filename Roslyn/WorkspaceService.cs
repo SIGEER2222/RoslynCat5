@@ -10,7 +10,7 @@ namespace RoslynCat.Roslyn
     {
         private readonly AdhocWorkspace _workspace;
         private readonly Project _project;
-        private readonly Document _document;
+        private  Document _document;
 
         public Document Document { get => _document; }
 
@@ -57,11 +57,14 @@ namespace RoslynCat.Roslyn
             return emitResult;
         }
 
-        public void OnDocumentChange(string newCode) {
+        public async void OnDocumentChange(string newCode) {
             //var documentId = _document.Id;
             //var document = _workspace.CurrentSolution.GetDocument(documentId);
             var newSolution = _document.Project.Solution.WithDocumentText(_document.Id, SourceText.From(newCode));
             _workspace.TryApplyChanges(newSolution);
+            var text = await _document.GetTextAsync();
+            //_project.RemoveDocument(_document.Id);
+            _document = _project.AddDocument("RoslynCat.cs",SourceText.From(newCode));
         }
 
         //TODO
