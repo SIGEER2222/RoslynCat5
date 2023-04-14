@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using RoslynCat.Interface;
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -12,9 +14,10 @@ namespace RoslynCat.Controllers
         public string FileName { get; set; } = "UserCode.cs";
         public string Description { get; set; } = "Testing...";
         public string Code { get; set; }
+        
         public string GistId { get; set; }
-        private string token  = "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";
         private string url = "https://api.github.com";
+        
         public async Task CreateGistAsync(string code) {
             if (code is null) return;
 
@@ -45,16 +48,30 @@ namespace RoslynCat.Controllers
         }
 
         public async Task<string> GetGistContentAsync(string gistId) {
-            if (gistId is null) return string.Empty;
+            if (gistId is null) return Constants.defultCode;
+
+            ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json");
+            var configuration = configurationBuilder.Build();
+            string token = configuration["gist"];
 
             HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("GistExample","1.0"));
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token",token);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             var getGistResponse = await httpClient.GetAsync($"{url}/gists/{gistId}");
-            getGistResponse.EnsureSuccessStatusCode();
-            var gist = JObject.Parse(await getGistResponse.Content.ReadAsStringAsync());
-            var gistContent = gist["files"][FileName]["content"].Value<string>();
 
-            return gistContent;
+            stopwatch.Stop();
+            Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
+            if (getGistResponse.IsSuccessStatusCode) {
+                getGistResponse.EnsureSuccessStatusCode();
+                var gist = JObject.Parse(await getGistResponse.Content.ReadAsStringAsync());
+                var gistContent = gist["files"][FileName]["content"].Value<string>();
+                return gistContent;
+            }
+            else { return Constants.defultCode; }
         }
-
     }
 }

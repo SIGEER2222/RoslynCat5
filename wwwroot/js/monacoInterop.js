@@ -4,8 +4,9 @@ import * as module from "./module.js";
 let languageId = "csharp";
 let monacoInterop = {};
 monacoInterop.editors = {};
-let sourceCode = [
-    `using System;
+let defaultCode =
+[
+`using System;
 
 public class MyClass
 {
@@ -15,9 +16,12 @@ public class MyClass
 	}
 }`
 ].join('\n');
+let sourceCode = localStorage.getItem('oldCode') ?? defaultCode;
 //创建和初始化编辑器
 monacoInterop.createEditor = (elementId, code) => {
-
+    if (code != defaultCode) {
+        sourceCode = code;
+    }
     let editor = monaco.editor.create(document.getElementById(elementId), {
         value: sourceCode,
         language: languageId,
@@ -51,100 +55,114 @@ monacoInterop.createEditor = (elementId, code) => {
 
 monacoInterop.CSharpRegister = (elementId) => {
     let languageId = "csharp";
-
-    //monaco.editor.onDidCreateModel(function (model) {
-    //    var handle = null;
-    //    model.updateOptions({
-
-    //        insertSpaces: false,
-    //    })
-    //    model.onDidChangeContent(() => {
-    //        console.log("创建了模型")
-    //        monaco.editor.setModelMarkers(model, 'csharp', []);
-    //        clearTimeout(handle);
-    //        handle = setTimeout(() => module.validate(), 500);
-    //    });
-    //    module.validate();
-    //})
-    //monaco.languages.registerCompletionItemProvider(languageId, {
-    //    triggerCharacters: [".", " "],
-    //    provideCompletionItems: module.provideCompletionItems
-    //});
-    //monaco.languages.registerSignatureHelpProvider(languageId, {
-    //    signatureHelpTriggerCharacters: ["("],
-    //    signatureHelpRetriggerCharacters: [","],
-    //    provideSignatureHelp: module.provideSignatureHelp
-    //});
-    //monaco.languages.registerHoverProvider(languageId, {
-    //    provideHover: module.provideHover
-    //});
 }
 
 monacoInterop.registerMonacoProviders = async (dotNetObject) => {
+    let suggestionsTab = [];
 
-    console.log(dotNetObject);
-    let cache = {};
-    let suggestions = [];
-    let myObject;
-    suggestions.push({
+    //定义常用快捷补全
+    suggestionsTab.push({
         label: {
             label: 'cw',
             description: '快捷键Console.WriteLine();'
         },
         insertText: 'Console.WriteLine()'
     })
-    //let obj = { Code: sourceCode, Position: 80 };
-    //console.log(obj)
-    //let a = await dotNetObject.invokeMethodAsync('ProvideCompletionItems', JSON.stringify(obj)).then(result => {
-    //    let r = JSON.parse(result);
-    //    for (let key in r) {
-    //        suggestions.push({
-    //            label: {
-    //                label: key,
-    //                description: r[key]
-    //            },
-    //            kind: monaco.languages.CompletionItemKind.Function,
-    //            insertText: key
-    //        });
-    //    }
 
-    //});
+    async function getProvidersAsync(code, position) {
+        let suggestions = [];
+        await dotNetObject.invokeMethodAsync('ProvideCompletionItems2', code, position).then(result => {
+            let r = JSON.parse(result);
+            for (let key in r) {
+                suggestions.push({
+                    label: {
+                        label: key,
+                        description: r[key]
+                    },
+                    kind: monaco.languages.CompletionItemKind.Function,
+                    insertText: key
+                });
+            }
+        });
+        return suggestionsTab.concat(suggestions);
+    }
 
-    //dotNetObject.invokeMethodAsync('ProvideCompletionItems2', "1", 1);
+    //预加载
+    suggestionsTab = await getProvidersAsync(sourceCode, 100);
+
+    //注册自动完成提供程序
     monaco.languages.registerCompletionItemProvider(languageId, {
-        triggerCharacters: ['.', ';', ' ', ','],
+        triggerCharacters: ['.', ' ', ','],
         provideCompletionItems: async (model, position) => {
-            console.log("suggestions")
             let cursor = model.getOffsetAt(position);
-            console.log(cursor);
-            let obj = { Code: model.getValue(), Position: cursor };
-            await dotNetObject.invokeMethodAsync('ProvideCompletionItems2', model.getValue(), cursor).then(result => {
-                let r = JSON.parse(result);
-                for (let key in r) {
-                    suggestions.push({
-                        label: {
-                            label: key,
-                            description: r[key]
-                        },
-                        kind: monaco.languages.CompletionItemKind.Function,
-                        insertText: key
-                    });
-                }
-            });
-
-            console.log(suggestions)
+            const suggestions = await getProvidersAsync(model.getValue(), cursor);
             return { suggestions: suggestions };
         }
     });
 
-    monaco.languages.registerSignatureHelpProvider(languageId, {
-        signatureHelpTriggerCharacters: ["("],
-        signatureHelpRetriggerCharacters: [","],
-        provideSignatureHelp: (model, position) => {
-            //return dotNetObject.invokeMethodAsync("ProvideSignatureHelp", model.uri.toString(), position);
+    //注册悬浮提示
+    monaco.languages.registerHoverProvider('csharp', {
+        provideHover: async function (model, position) {
+            const code = model.getValue();
+            const cursor = model.getOffsetAt(position);
+
+            const result = await dotNetObject.invokeMethodAsync('HoverInfoProvide', code, cursor);
+            const r = JSON.parse(result);
+            console.log(r)
+            if (r) {
+                let posStart = model.getPositionAt(r.OffsetFrom);
+                let posEnd = model.getPositionAt(r.OffsetTo);
+
+                return {
+                    range: new monaco.Range(posStart.lineNumber, posStart.column, posEnd.lineNumber, posEnd.column),
+                    contents: [
+                        { value: r.Information }
+                    ]
+                };
+            }
         }
     });
 
+    //TODO
+    monaco.languages.registerSignatureHelpProvider(languageId, {
+        signatureHelpTriggerCharacters: ["("],
+        signatureHelpRetriggerCharacters: [","],
+        provideSignatureHelp: (model, position, token, context) => {
+            console.log(111)
+            // 获取当前位置的单词
+            const word = model.getWordUntilPosition(position);
+            if (!word) {
+                return null;
+            }
+
+            // 判断当前单词是否为 Console.WriteLine
+            if (word.word !== 'Console' || model.getValueInRange({ startLineNumber: position.lineNumber, startColumn: word.endColumn, endLineNumber: position.lineNumber, endColumn: position.column }).indexOf("WriteLine") === -1) {
+                return null;
+            }
+
+            // 提取 Console.WriteLine 函数签名和参数信息
+            const signature = {
+                label: "Console.WriteLine(value: string): void",
+                documentation: "Writes the specified string value, followed by the current line terminator, to the standard output stream.",
+                parameters: [{
+                    label: "value: string",
+                    documentation: "The string value to write."
+                }]
+            };
+
+            // 返回 Console.WriteLine 函数签名信息
+            return {
+                value: {
+                    activeSignature: 0,
+                    activeParameter: Math.min(context.argumentIndex, signature.parameters.length - 1),
+                    signatures: [signature]
+                },
+                dispose: () => { }
+            };
+        }
+    });
+
+    //TODO
     monaco.editor.onDidCreateModel(function (model) {
         var handle = null;
         model.updateOptions({
@@ -160,11 +178,35 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
         module.validate();
     })
 
-    //monaco.languages.registerHoverProvider(languageId, {
-    //    provideHover: (model, position) => {
-    //        return dotNetObject.invokeMethodAsync("ProvideHover", model.uri.toString(), position);
-    //    }
-    //});
+    //添加快捷键
+    monacoInterop.editors['editorId'].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+        localStorage.setItem('oldCode', monacoInterop.editors['editorId'].getValue());
+    });
+    monacoInterop.editors['editorId'].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
+        dotNetObject.invokeMethodAsync('FormatCode', monacoInterop.editors['editorId'].getValue())
+            .then(formatCode => { monacoInterop.editors['editorId'].setValue(formatCode); });
+    });
+
+    //添加右键
+    monacoInterop.editors['editorId'].addAction({
+        id: "formatCode",
+        label: "格式化代码 ctrl + k",
+        contextMenuOrder: 0,
+        contextMenuGroupId: "code",
+        run: function (editor) {
+            dotNetObject.invokeMethodAsync('FormatCode', editor.getValue())
+                .then(formatCode => { editor.setValue(formatCode); });
+        }
+    });
+    monacoInterop.editors['editorId'].addAction({
+        id: "clear",
+        label: "清除",
+        contextMenuOrder: 1,
+        contextMenuGroupId: "code",
+        run: function (editor) {
+            editor.setValue(defaultCode);
+        }
+    });
 }
 
 
@@ -193,13 +235,6 @@ monacoInterop.setLanguageConfiguration = () => monaco.languages.setLanguageConfi
     indentationRules: module.languageConfiguration.indentationRules,
 });
 
-// 注册自动完成提供程序
-monacoInterop.registerCompletionItemProvider = () => monaco.languages.registerCompletionItemProvider(languageId, {
-    triggerCharacters: [".", " "],
-    provideCompletionItems: module.provideCompletionItems,
-})
-
-
 // 创建model触发
 monacoInterop.onDidCreateModel = () => monaco.editor.onDidCreateModel(function (model) {
     module.validate(model)
@@ -211,12 +246,6 @@ monacoInterop.onDidChangeContent = () => monaco.editor.onDidChangeContent(() => 
     clearTimeout(handle);
     handle = setTimeout(() => module.validate(), 500);
 })
-
-monacoInterop.registerDocumentSemanticTokensProvider = () =>
-    monaco.languages.registerDocumentSemanticTokensProvider(languageId, {
-        getLegend: function () { return legend; },
-        provideDocumentSemanticTokens: () => { },
-    })
 
 //设置主题颜色
 monacoInterop.setTheme = () => {

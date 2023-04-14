@@ -3,7 +3,7 @@ using RoslynCat.Interface;
 
 namespace RoslynCat.Roslyn
 {
-    public class CompletionProvider 
+    public class CompletionProvider
     {
         private Document document;
         private SemanticModel semanticModel;
@@ -17,28 +17,35 @@ namespace RoslynCat.Roslyn
         private readonly ICodeCheckProvider _codeCheckProvider;
 
         public CompletionProvider(ICompleteProvider completeProvider,IHoverProvider hoverProvider,ICodeCheckProvider codeCheckProvider) {
-            _completeProvider    = completeProvider;
+            _completeProvider = completeProvider;
             //_signatureProvider = signatureProvider;
-            _hoverProvider       = hoverProvider;
-            _codeCheckProvider   = codeCheckProvider;
+            _hoverProvider = hoverProvider;
+            _codeCheckProvider = codeCheckProvider;
         }
 
-        public async Task<CompletionProvider> CreateProviderAsync(IWorkSpaceService workSpace, SourceInfo sourceInfo) {
+        public async Task<CompletionProvider> CreateProviderAsync(IWorkSpaceService workSpace,SourceInfo sourceInfo) {
             workSpace.OnDocumentChange(sourceInfo.SourceCode);
-            document      = workSpace.Document;
+            document = workSpace.Document;
             semanticModel = await workSpace.GetSmanticModelAsync();
-            emitResult    = await workSpace.GetEmitResultAsync();
-            position      = sourceInfo.Position;
-            type          = sourceInfo.Type;
+            emitResult = await workSpace.GetEmitResultAsync();
+            position = sourceInfo.Position;
+            type = sourceInfo.Type;
             return this;
         }
 
         public async Task<IResponse> GetResultAsync() => type switch {
-            RequestType.Complete      => await _completeProvider.Provide(document,position),
+            RequestType.Complete => await _completeProvider.Provide(document,position),
             //(RequestType.Signature) => await _signatureProvider.Provide(document,position,semanticModel),
-            RequestType.Hover         => await _hoverProvider.Provide(document,position,semanticModel),
-            RequestType.CodeCheck     => await _codeCheckProvider.Provide(emitResult,document),
-            RequestType.None          => null
+            RequestType.Hover => await _hoverProvider.Provide(document,position,semanticModel),
+            RequestType.CodeCheck => await _codeCheckProvider.Provide(emitResult,document),
+            RequestType.None => null
         };
+
+        public async Task<string> FormatCode(string code) {
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code);
+            CompilationUnitSyntax root = syntaxTree.GetCompilationUnitRoot();
+            SyntaxNode formattedNode = root.NormalizeWhitespace();
+            return formattedNode.ToFullString();
+        }
     }
 }

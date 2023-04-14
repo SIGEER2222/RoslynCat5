@@ -1,12 +1,8 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.CodeAnalysis.Host.Mef;
+﻿using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis.Text;
-using RoslynCat.Data;
 using System.ComponentModel;
 using System.Data;
 using System.Xml;
-using Microsoft.Extensions.DependencyInjection;
 using System.Numerics;
 
 namespace RoslynCat.Roslyn

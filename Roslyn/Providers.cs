@@ -1,8 +1,14 @@
-﻿using Microsoft.CodeAnalysis.Completion;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
 using RoslynCat.Interface;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
+using System.Threading;
+using System.Xml.Linq;
 using static RoslynCat.Roslyn.HoverInfo;
 
 namespace RoslynCat.Roslyn
@@ -15,10 +21,6 @@ namespace RoslynCat.Roslyn
             var dict = new ConcurrentDictionary<string, string>();
             var completionService = CompletionService.GetService(document);
             CompletionList results = completionService.GetCompletionsAsync(document, position).Result;
-
-            //var syntaxTree = document.GetSyntaxTreeAsync().Result;
-            //var root = syntaxTree.GetRoot();
-            //var node = root.FindNode(new TextSpan(position, 0));
 
             if (results is null) {
                 return new CompletionResult();
@@ -46,26 +48,18 @@ namespace RoslynCat.Roslyn
     public class HoverProvider : IHoverProvider
     {
         public async Task<HoverInfoResult> Provide(Document document,int position,SemanticModel semanticModel) {
-            Microsoft.CodeAnalysis.TypeInfo typeInfo;
-            SyntaxNode syntaxRoot = await document.GetSyntaxRootAsync();
-            SyntaxNode expressionNode = syntaxRoot.FindToken(position).Parent;
-
-            var references = document.Project.MetadataReferences;
-            foreach (var reference in references) {
-                Console.WriteLine(reference.Display);
-            }
-
+            //Microsoft.CodeAnalysis.TypeInfo typeInfo;
+            SyntaxNode expressionNode = semanticModel.SyntaxTree.GetRoot().FindToken(position).Parent;
             string result = expressionNode switch{
-                VariableDeclaratorSyntax vd     => semanticModel.GetTypeInfo(vd.ChildNodes().FirstOrDefault()?.ChildNodes().FirstOrDefault()).Type?.ToString(),
-                PropertyDeclarationSyntax prop  => prop.Type?.ToString(),
-                IdentifierNameSyntax Identifier => semanticModel.GetTypeInfo(Identifier).Type?.ToString(),
-                ParameterSyntax param           => param.Type?.ToString(),
-                SyntaxNode s                    => HoverInfoBuilder.Build(semanticModel.GetSymbolInfo(s)),
-                _                               => string.Empty
-            };
-
+                VariableDeclaratorSyntax vd => $"Variable: {vd.Identifier.Text} ({semanticModel.GetTypeInfo(vd).Type})",
+                PropertyDeclarationSyntax prop => $"Property: {prop.Identifier.Text} ({prop.Type})",
+                MethodDeclarationSyntax method => $"Method: {method.Identifier.Text} ({method.ReturnType})",
+                ParameterSyntax param => $"Parameter: {param.Identifier.Text} ({param.Type})",
+                LiteralExpressionSyntax literal => HoverInfoBuilder.Literal(literal),
+                _ => HoverInfoBuilder.Build(semanticModel.GetSymbolInfo(expressionNode))
+            }; 
+            await Console.Out.WriteLineAsync(result);
             Location location = expressionNode.GetLocation();
-
             if (string.IsNullOrWhiteSpace(result)) {
                 return default;
             }

@@ -1,20 +1,41 @@
-﻿using Microsoft.CodeAnalysis;
-using System.Text;
-using System.Xml.Linq;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace RoslynCat.Roslyn
 {
     public class HoverInfo
     {
-        public static class  HoverInfoBuilder
-        {
-            public static string Build(SymbolInfo symbolInfo) => symbolInfo.Symbol switch {
-                IMethodSymbol method => BuildMethodSymbol(method),
-                ILocalSymbol local => BuildLocalSymbol(local),
-                IFieldSymbol field => BuildLocalSymbol(field),
-                _ => string.Empty
-            };
 
+        public static class HoverInfoBuilder
+        {
+
+            public static string Literal(LiteralExpressionSyntax literal) {
+                Type type = literal.Token.Value.GetType();
+                string literalValue = string.Empty;
+
+                if (literal.Token.Value is double doubleValue) {
+                    byte[] bytes = BitConverter.GetBytes(doubleValue);
+                    double value = BitConverter.ToDouble(bytes, 0);
+                    string stringValue = doubleValue.ToString("R");
+                    literalValue = $"{type}: {stringValue}";
+                }
+                else {
+                    literalValue = $"{type}: {literal.Token.Value}";
+
+                }
+                return literalValue;
+            }
+            public static string Build(SymbolInfo symbolInfo) {
+
+                string s = symbolInfo.Symbol switch {
+                    IMethodSymbol method => BuildMethodSymbol(method),
+                    ILocalSymbol local => BuildLocalSymbol(local),
+                    IFieldSymbol field => BuildLocalSymbol(field),
+                    ITypeSymbol type => BuildTypeSymbol(type),
+                    ISymbol symbol => BuildSymbol(symbol),
+                    _ => BuildSymbol(symbolInfo.Symbol)
+                };
+                return s;
+            }
             private static string BuildMethodSymbol(IMethodSymbol methodSymbol) {
                 var parameters = string.Join(", ", methodSymbol.Parameters.Select(p => $"{p.Type} {p.Name}"));
                 return $"(method) {methodSymbol.DeclaredAccessibility.ToString().ToLower()} {(methodSymbol.IsStatic ? "static " : "")}{methodSymbol.Name}({parameters}) : {methodSymbol.ReturnType}";
@@ -31,6 +52,39 @@ namespace RoslynCat.Roslyn
                 string isConst = symbol.IsConst ? "const " : "";
 
                 return $"{symbol.Name} : {accessibility} {isStatic}{isReadOnly}{isConst}{symbol.Type}";
+            }
+
+
+            private static string BuildTypeSymbol(ITypeSymbol typeSymbol) {
+                var accessModifier = typeSymbol.DeclaredAccessibility.ToString().ToLower();
+                var isSealed = typeSymbol.IsSealed ? "cannot be inherited" : "can be inherited";
+                var inheritance = GetInheritanceHierarchy(typeSymbol);
+                var result = $"{typeSymbol.ToDisplayString()} class{Environment.NewLine}" +
+        $" Represents {accessModifier} {isSealed}.{Environment.NewLine}" +
+        $"{inheritance}";
+
+                return result;
+            }
+
+            private static string BuildSymbol(ISymbol symbol) {
+                if (symbol is null) {
+                    return string.Empty;
+                }
+                var result = $"{symbol.Name} keyword{Environment.NewLine}" +
+        $" Represents a {symbol.Kind} keyword.{Environment.NewLine}";
+                return result;
+            }
+
+            private static string GetInheritanceHierarchy(ITypeSymbol typeSymbol) {
+                var hierarchy = new List<string>();
+                var currentType = typeSymbol;
+                while (currentType != null) {
+                    hierarchy.Add(currentType.Name);
+                    currentType = currentType.BaseType;
+                }
+
+                hierarchy.Reverse();
+                return $"Inherits: {string.Join("->",hierarchy)}{Environment.NewLine}";
             }
         }
     }

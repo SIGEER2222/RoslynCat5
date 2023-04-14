@@ -1,10 +1,7 @@
-﻿using RoslynCat.Controllers;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System.Web;
 using Microsoft.CodeAnalysis.Text;
-using RoslynCat.Data;
-using System.IO;
 
 namespace RoslynCat.Roslyn
 {
@@ -108,11 +105,6 @@ namespace RoslynCat.Roslyn
                 return res;
             }
         }
-
-        public EmitResult Compile() {
-            // 编译代码并生成 IL
-            return compilation.Emit("HelloWorld.dll");
-        }
     }
 
 
@@ -129,7 +121,6 @@ namespace RoslynCat.Roslyn
         private List<string> _history = new List<string>();
         private int _historyIndex = 0;
 
-        //[Inject] private NavigationManager navigationManager { get; set; }
         [Inject] private IJSRuntime _JSRuntime { get; set; }
         public async Task RunSubmisson(string code) {
             Output += $@"<br /><span class=""info"">{HttpUtility.HtmlEncode(code)}</span>";
@@ -217,35 +208,6 @@ namespace RoslynCat.Roslyn
             Console.SetOut(writer);
             Exception exception = null;
             Console.SetOut(currentOut);
-
-            //    Helpers.RecordExecutionTime(() =>
-            //    {
-            //        var (isComplite, asm) = LoadSource();
-            //        try {
-            //            if (isComplite) {
-            //                MemberInfo entry = asm.EntryPoint;
-            //                entry = entry.DeclaringType.GetMethod("Main",
-            //                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static); // reflect for the async Task Main
-            //                bool hasArgs = entry.GetParameters().Length > 0;
-            //                object result = entry.Invoke(null, hasArgs ? new object[] { Array.Empty<string>() } : null);
-            //                if (result is Task t) await t;
-            //                else {
-            //                    var message = result?.ToString() ?? "null";
-            //                    Console.WriteLine($"Main method returned: {message}");
-            //                }
-            //            }
-            //        }
-            //        catch (Exception ex) when (ex is CompilationErrorException || ex is TargetInvocationException) {
-            //            exception = $"Error: {ex.GetType().Name} - {ex.InnerException?.Message}";
-            //        }
-            //        catch (Exception ex) {
-            //            exception = ($"Unexpected error: {ex.Message}");
-            //            throw; // rethrow exception to upper level
-            //        }
-            //    });
-            //    outPut = writer.ToString() + (exception ?? "\r\n");
-            //    StateHasChanged();
-            //}
             void Compile(string source) {
                 var sw = Stopwatch.StartNew();
                 var compilation = CSharpCompilation.Create("DynamicCode")

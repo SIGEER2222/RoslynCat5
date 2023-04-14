@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.JSInterop;
 using RoslynCat.Controllers;
@@ -13,46 +14,64 @@ namespace RoslynCat.Pages
     {
         public List<Diagnostic> Diagnostics { get; set; }
         [Inject] Compiler CompliterService { get; set; }
-        //[Inject] CompletionDocument doc { get; set; }
+        [Inject] IGistService GistService { get; set; }
         [Inject] IJSRuntime JS { get; set; }
         [Inject] IWorkSpaceService WorkSpaceService { get; set; }
         [Inject] Roslyn.CompletionProvider CompletionProvider { get; set; }
+        [Parameter] public string gistId { get; set; }
+
         private string result = "等待编译...";
         private string shareId = string.Empty;
-        protected override void OnParametersSet() {
-            //this.MonacoService.DiagnosticsUpdated += this.OnDiagnosticsUpdated;
-            base.OnParametersSet();
+        Uri uri;
+        protected override async void OnInitialized() {
+            uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+            //if (true) {
+
+            //}
+            //if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("GistId",out var gistId)) {
+            //    code = await GistService.GetGistContentAsync(gistId);
+            //}
+            await Console.Out.WriteLineAsync("111");
         }
+
+        //protected override async Task OnParametersSetAsync() {
+        //    //this.MonacoService.DiagnosticsUpdated += this.OnDiagnosticsUpdated;
+        //    if (gistId is object) {
+        //        code = await GistService.GetGistContentAsync(gistId);
+        //    }
+        //    base.OnParametersSet();
+        //}
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
             await Console.Out.WriteLineAsync(typeof(Index).Assembly.FullName);
             if (firstRender) {
                 JsRuntimeExt.Shared = JS;
+                if (gistId is object) {
+                   
+                    code = await GistService.GetGistContentAsync(gistId);
+                }
                 await JsRuntimeExt.Shared.CreateMonacoEditorAsync(editorId,code);
                 await CompliterService.CreatCompilation(code);
                 await JsRuntimeExt.Shared.InvokeVoidAsync("monacoInterop.registerMonacoProviders",DotNetObjectReference.Create(this));
-                //doc.Test();
             }
         }
 
-        [JSInvokable("ProvideCompletionItems2")]
-        public static async Task<CompletionItem[]> ProvideCompletionItems3(string a,int b) {
+        [JSInvokable("FormatCode")]
+        public async Task<string> FormatCode(string code) {
             // 方法实现
-            return null;
+            string format = await CompletionProvider.FormatCode(code);
+            return format;
         }
 
-        [JSInvokable("ProvideCompletionItems")]
-        public async Task<string> ProvideCompletionItems(string jsObj) {
+        [JSInvokable("HoverInfoProvide")]
+        public async Task<string> HoverInfoProvide(string code,int position) {
 
-            var obj = JsonSerializer.Deserialize<JsObj>(jsObj);
-            //string code = await JsRuntimeExt.Shared.GetValue(editorId);
-            SourceInfo sourceInfo = new SourceInfo(obj.Code,string.Empty,obj.Position);
-            sourceInfo.Type = RequestType.Complete;
+            SourceInfo sourceInfo = new SourceInfo(code,string.Empty,position);
+            sourceInfo.Type = RequestType.Hover;
             await CompletionProvider.CreateProviderAsync(WorkSpaceService,sourceInfo);
             IResponse respone = await CompletionProvider.GetResultAsync();
-            CompletionResult result = respone as CompletionResult;
-            string jsonString = JsonSerializer.Serialize(result.Suggestions);
-            return jsonString;
+            HoverInfoResult result = respone as HoverInfoResult;
+            return JsonSerializer.Serialize(result);
         }
         [JSInvokable("ProvideCompletionItems2")]
         public async Task<string> ProvideCompletionItems(string code,int position) {
@@ -63,25 +82,7 @@ namespace RoslynCat.Pages
             CompletionResult result = respone as CompletionResult;
             return JsonSerializer.Serialize(result.Suggestions);
         }
-        public class JsObj
-        {
-            public string Code { get; set; }
-            public int Position { get; set; }
-        }
 
-        public class CompletionItem
-        {
-            public Label Label { get; set; }
-            public string Suggestion { get; set; }
-            public string Description { get; set; }
-            public string ItemType { get; set; }
-        }
-
-        public class Label
-        {
-            public string LabelText { get; set; }
-            public string Description { get; set; }
-        }
         protected async Task Test() {
             code = await JsRuntimeExt.Shared.GetValue(editorId);
             result = CompliterService.CompileAndRun(code);
@@ -92,7 +93,7 @@ namespace RoslynCat.Pages
             if (string.IsNullOrEmpty(code)) return;
             CodeSharing share = new CodeSharing();
             await share.CreateGistAsync(code);
-            shareId = share.GistId;
+            shareId = "https://localhost:7175/codeshare/" + share.GistId;
             await JsRuntimeExt.Shared.CopyUrl();
         }
 

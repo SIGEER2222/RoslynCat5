@@ -521,3 +521,54 @@ function computeLineSemanticTokens(line, offset, token) {
 
 let cache = new Map();
 }
+
+
+//弹窗
+function createPopup() {
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.top = '5%'; // 垂直方向上占据页面 90%
+    popup.style.left = '5%';
+    popup.style.width = '90%'; // 水平方向上占据页面 90%
+    popup.style.height = '90%';
+    popup.style.backgroundColor = '#fff'; // 不透明白色背景
+
+    const frame = document.createElement('iframe');
+    frame.style.width = '100%';
+    frame.style.height = '100%';
+    frame.src = 'https://juejin.cn/post/6984683777343619102';
+    frame.setAttribute('tabindex', '0'); // 将 iframe 设为可聚焦元素
+    popup.appendChild(frame);
+
+    const closeButton = document.createElement('button');
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.color = '#000';
+    closeButton.style.fontSize = '20px';
+    closeButton.innerText = '关闭';
+    closeButton.addEventListener('click', () => {
+        document.body.removeChild(popup);
+    });
+    popup.appendChild(closeButton);
+
+    document.body.appendChild(popup);
+
+    // 将焦点定向到 iframe 中
+    frame.focus();
+
+    // 绑定按键事件，按 ESC 关闭弹窗
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            document.body.removeChild(popup);
+        }
+    });
+
+    // 绑定事件，当弹窗内的元素失去焦点时，将焦点重新定向到 iframe 中
+    const elements = popup.querySelectorAll('*');
+    elements.forEach((element) => {
+        element.addEventListener('blur', () => {
+            frame.focus();
+        });
+    });
+}
