@@ -76,7 +76,7 @@ namespace RoslynCat.Roslyn
     public class CodeCheckProvider : ICodeCheckProvider
     {
         public async Task<CodeCheckResult> Provide(EmitResult emitResult,Document document) {
-            CodeCheckResult result = CodeCheckResult.GetInstance();
+            CodeCheckResult result = new CodeCheckResult();
 
             var codeChecks = result.codeChecks;
             foreach (var r in emitResult.Diagnostics) {

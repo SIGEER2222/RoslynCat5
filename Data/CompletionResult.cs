@@ -29,11 +29,6 @@ namespace RoslynCat.Data
     {
         public CodeCheckResult() { }
 
-        private static readonly CodeCheckResult instance = new CodeCheckResult();
-
-        public static CodeCheckResult GetInstance() {
-            return instance;
-        }
         public List<CodeCheck> codeChecks { get; set; } = new List<CodeCheck>();
 
         public class CodeCheck {

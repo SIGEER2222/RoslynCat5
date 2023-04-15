@@ -3,6 +3,7 @@ import * as module from "./module.js";
 
 let languageId = "csharp";
 let monacoInterop = {};
+
 monacoInterop.editors = {};
 let defaultCode =
     [
@@ -16,46 +17,21 @@ class Program
 }`
     ].join('\n');
 let sourceCode = localStorage.getItem('oldCode') ?? defaultCode;
-//创建和初始化编辑器
 
-function createEditor(elementId, value) {
-    let editor = monaco.editor.create(document.getElementById(elementId), {
-        value: value,
-        language: languageId,
-        theme: "vs-dark",
-        tabSize: 4,
-        insertSpaces: false,
-        wrappingIndent: "indent",
-        wordWrap: "wordWrapColumn",
-        "semanticHighlighting.enabled": true,
-        minimap: {
-            enabled: false
-        },
-        formatOnType: true,
-        formatOnPaste: true,
-        autoIndent: true,
-        fontSize: 16,
-        lineHeight: 22,
-        fontFamily: 'Consolas,Menlo,Monaco,monospace',
-        automaticLayout: true,
-        contextmenu: true,
-        copyWithSyntaxHighlighting: true,
-    });
-    return editor;
-}
+
+//创建和初始化编辑器
 monacoInterop.createEditor = (elementId, code) => {
     let editor;
     if (elementId == 'editorId') {
-        if (code != defaultCode) {
-            //sourceCode = code;
-        }
-        editor = createEditor(elementId, sourceCode);
+        //if (code != defaultCode) {
+        //    //sourceCode = code;
+        //}
+        editor = module.createEditor(elementId, sourceCode);
         monacoInterop.setMonarchTokensProvider();
         monacoInterop.setLanguageConfiguration();
         monacoInterop.CSharpRegister();
-
     } else if (elementId = 'resultId') {
-        editor = createEditor(elementId, code);
+        editor = module.createEditor(elementId, code);
     }
     monacoInterop.editors[elementId] = editor;
     console.log("初始化完毕")
@@ -66,18 +42,27 @@ monacoInterop.CSharpRegister = (elementId) => {
     let languageId = "csharp";
 }
 
+//注册C#语言的语法提示、快捷键等
 monacoInterop.registerMonacoProviders = async (dotNetObject) => {
-    let suggestionsTab = [];
 
-    //定义常用快捷补全
-    suggestionsTab.push({
-        label: {
-            label: 'cw',
-            description: '快捷键Console.WriteLine();'
-        },
-        insertText: 'Console.WriteLine()'
-    })
+    //TODO
+    console.log("ssssssssss")
+    //monaco.editor.onDidCreateModel(model => {
+    //    console.log("新模型已创建:", model.uri.toString());
+    //    model.onDidChangeContent(() => {
+    //    let handle = null;
+    //        console.log("创建了模型")
+    //        //清除错误信息
+    //        monaco.editor.setModelMarkers(model, 'csharp', []);
+    //        //清除等待
+    //        clearTimeout(handle);
+    //        handle = setTimeout(() => getModelMarkers(model), 500);
+    //    });
+    //    module.validate();
+    //})
 
+
+    //
     async function getProvidersAsync(code, position) {
         let suggestions = [];
         await dotNetObject.invokeMethodAsync('ProvideCompletionItems2', code, position).then(result => {
@@ -95,6 +80,17 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
         });
         return suggestionsTab.concat(suggestions);
     }
+
+    let suggestionsTab = [];
+
+    //定义常用快捷补全
+    suggestionsTab.push({
+        label: {
+            label: 'cw',
+            description: '快捷键Console.WriteLine();'
+        },
+        insertText: 'Console.WriteLine()'
+    })
 
     //预加载
     suggestionsTab = await getProvidersAsync(sourceCode, 100);
@@ -171,21 +167,40 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
         }
     });
 
-    //TODO
-    monaco.editor.onDidCreateModel(function (model) {
-        var handle = null;
-        model.updateOptions({
 
-            insertSpaces: false,
-        })
-        model.onDidChangeContent(() => {
-            console.log("创建了模型")
-            monaco.editor.setModelMarkers(model, 'csharp', []);
-            clearTimeout(handle);
-            handle = setTimeout(() => module.validate(), 500);
-        });
-        module.validate();
+    async function getModelMarkers(model) {
+        let code = model.getValue();
+        let result = await dotNetObject.invokeMethodAsync('GetModelMarkers', code, 80);
+        console.log(result);
+        let markers = [];
+        let posStart;
+        let posEnd;
+        result = JSON.parse(result);
+        console.log(result);
+        for (let elem of result) {
+            posStart = model.getPositionAt(elem.OffsetFrom);
+            posEnd = model.getPositionAt(elem.OffsetTo);
+            markers.push({
+                severity: elem.Severity,
+                startLineNumber: posStart.lineNumber,
+                startColumn: posStart.column,
+                endLineNumber: posEnd.lineNumber,
+                endColumn: posEnd.column,
+                message: elem.Message,
+                code: elem.Id
+            });
+        }
+        //const markers = monaco.editor.getModelMarkers({ resource: uri })
+        console.log(markers)
+        monaco.editor.setModelMarkers(model, 'csharp', markers);
+        // markers是返回的错误信息数组，可赋值给需要判断语法错误的关键词，如this.coderErrors = markers
+    }
+
+    monacoInterop.editors['editorId'].getModel().onDidChangeContent(event => {
+        //TODO设置一个定时器
+        getModelMarkers(monacoInterop.editors['editorId'].getModel());
     })
+
 
     //添加快捷键
     monacoInterop.editors['editorId'].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {

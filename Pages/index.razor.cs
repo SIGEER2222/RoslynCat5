@@ -80,6 +80,15 @@ namespace RoslynCat.Pages
             IResponse respone = await CompletionProvider.GetResultAsync();
             CompletionResult result = respone as CompletionResult;
             return JsonSerializer.Serialize(result.Suggestions);
+        } 
+        [JSInvokable("GetModelMarkers")]
+        public async Task<string> GetModelMarkers(string code,int position) {
+            SourceInfo sourceInfo = new SourceInfo(code,string.Empty,position);
+            sourceInfo.Type = RequestType.CodeCheck;
+            await CompletionProvider.CreateProviderAsync(WorkSpaceService,sourceInfo);
+            IResponse respone = await CompletionProvider.GetResultAsync();
+            CodeCheckResult result = respone as CodeCheckResult;
+            return JsonSerializer.Serialize(result.codeChecks);
         }
 
         protected async Task Test() {

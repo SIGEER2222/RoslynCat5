@@ -87,7 +87,7 @@ export async function provideSignatureHelp(model, postion) {
     };
 }
 
-export async function provideCompletionItems(model, position){
+export async function provideCompletionItems(model, position) {
     let suggestions = [];
 
     let request = {
@@ -426,7 +426,7 @@ const CSHARP_LEGEND = {
 const CSHARP_TOKEN_PATTERN = /(?<=\W|^)(class|void|int|string|bool|true|false|null|var|new|async|await|namespace|using)(?=\W|$)|(?<=\W|^)(static|readonly)(\.[A-Za-z0-9_]+)*(?=\W|$)|(?<=\W|^)(\w+)(?= *\()|\/\/.*|\/\*[\s\S]*?\*\//gm;
 
 
-export function  getType(type) {
+export function getType(type) {
     return legend.tokenTypes.indexOf(type);
 }
 
@@ -463,65 +463,109 @@ export function getModifier(modifiers) {
         return 0;
     }
 }
-export function registerDocumentSemanticTokensProvider() { 
-monaco.languages.registerDocumentSemanticTokensProvider(languageId, {
-    getLegend: function () { return CSHARP_LEGEND; },
-    provideDocumentSemanticTokens: function (model, lastResultId, token) {
+export function registerDocumentSemanticTokensProvider() {
+    monaco.languages.registerDocumentSemanticTokensProvider(languageId, {
+        getLegend: function () { return CSHARP_LEGEND; },
+        provideDocumentSemanticTokens: function (model, lastResultId, token) {
 
-        if (lastResultId) {
-            let cachedResult = cache.get(lastResultId);
-            if (cachedResult) {
-                return cachedResult;
+            if (lastResultId) {
+                let cachedResult = cache.get(lastResultId);
+                if (cachedResult) {
+                    return cachedResult;
+                }
             }
+
+            var lines = model.getLinesContent();
+            var data = [];
+
+            let result = computeDocumentSemanticTokens(model, token);
+
+            // 将结果添加到缓存中
+            let resultId = uuidv4();
+            cache.set(resultId, result);
+
+            return {
+                data: result.tokens,
+                resultId,
+            };
+        },
+        releaseDocumentSemanticTokens: function (resultId) {
+            // Release any resources associated with the given resultId here...
+            cache.delete(resultId);
+        }
+    });
+
+    function computeDocumentSemanticTokens(model, token) {
+        let lines = model.getLinesContent();
+
+        let tokens = [];
+        let offset = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+
+            let lineTokens = computeLineSemanticTokens(line, offset, token);
+            tokens = tokens.concat(lineTokens);
+            offset += line.length + 1; // +1 是因为每行末尾会有一个换行符
         }
 
-        var lines = model.getLinesContent();
-        var data = [];
-
-        let result = computeDocumentSemanticTokens(model, token);
-
-        // 将结果添加到缓存中
-        let resultId = uuidv4();
-        cache.set(resultId, result);
-
-        return {
-            data: result.tokens,
-            resultId,
-        };
-    },
-    releaseDocumentSemanticTokens: function (resultId) {
-        // Release any resources associated with the given resultId here...
-        cache.delete(resultId);
-    }
-});
-function computeDocumentSemanticTokens(model, token) {
-    let lines = model.getLinesContent();
-
-    let tokens = [];
-    let offset = 0;
-
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i];
-
-        let lineTokens = computeLineSemanticTokens(line, offset, token);
-        tokens = tokens.concat(lineTokens);
-        offset += line.length + 1; // +1 是因为每行末尾会有一个换行符
+        return { tokens };
     }
 
-    return { tokens };
+    function computeLineSemanticTokens(line, offset, token) {
+        let tokens = [];
+
+        // ... 根据语法规则计算出该行的语义单元 ...
+
+        return tokens;
+    }
+
+    let cache = new Map();
 }
 
-function computeLineSemanticTokens(line, offset, token) {
-    let tokens = [];
-
-    // ... 根据语法规则计算出该行的语义单元 ...
-
-    return tokens;
+export async function getProvidersAsync(code, position, dotNetObject) {
+    let suggestions = [];
+    await dotNetObject.invokeMethodAsync('ProvideCompletionItems2', code, position).then(result => {
+        let r = JSON.parse(result);
+        for (let key in r) {
+            suggestions.push({
+                label: {
+                    label: key,
+                    description: r[key]
+                },
+                kind: monaco.languages.CompletionItemKind.Function,
+                insertText: key
+            });
+        }
+    });
+    return suggestionsTab.concat(suggestions);
 }
 
-let cache = new Map();
+export function createEditor(elementId, value) {
+    let editor = monaco.editor.create(document.getElementById(elementId), {
+        value: value,
+        language: languageId,
+        theme: "vs-dark",
+        tabSize: 4,
+        insertSpaces: false,
+        wrappingIndent: "indent",
+        wordWrap: "wordWrapColumn",
+        "semanticHighlighting.enabled": true,
+        minimap: {
+            enabled: false
+        },
+        formatOnType: true,
+        formatOnPaste: true,
+        autoIndent: true,
+        fontSize: 16,
+        lineHeight: 22,
+        fontFamily: 'Consolas,Menlo,Monaco,monospace',
+        automaticLayout: true,
+        contextmenu: true,
+        copyWithSyntaxHighlighting: true,
+    });
+    return editor;
 }
-
 
 //弹窗
 function createPopup() {
