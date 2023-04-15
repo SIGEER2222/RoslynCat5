@@ -7,13 +7,14 @@ namespace RoslynCat.Data
     public static class Constants
     {
         public static readonly string csharpId = "editorId";
+        public static readonly string resultId = "resultId";
         public static readonly string gistId = "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";
         public static readonly string defultCode = @"using System;
 class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine(""Hello World!"");
+        Console.WriteLine(""欢迎使用RoslynCat"");
     }
 }";
         public static MetadataReference[] DefaultMetadataReferences = new MetadataReference[]

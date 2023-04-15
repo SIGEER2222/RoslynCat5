@@ -26,12 +26,13 @@
                     </div>
                     <button @onclick="Test">测试</button>
                     <button @onclick="CodeSharing">分享代码</button>
-                    <label> @shareId</label>
+                    <button @onclick="AskGPT">@askGpt</button>
+                    <label style="display:none;"> @s</label>
                 </header>
                 <div id="@editorId" class="monaco"></div>
             </section>
         </div>
-        <div class="top-section-group top-section-group-results" style="display : none">
+        <div class="top-section-group top-section-group-results" style="">
             <section class="top-section result">
                 <header>
                     <h1>Output</h1>
@@ -49,16 +50,20 @@
                             <option value="auto">自动</option>
                         </select>
                     </div>
+
                 </header>
+                    <div id="@resultId" class="monaco"> </div>
+
                 <div class="content">
-                    <div class="CodeMirror cm-s-default mirrorsharp-theme">
+                    @*<div id="resultId" class="monaco"> @result</div>*@
+                    @*<div class="CodeMirror cm-s-default mirrorsharp-theme">
                         <div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 291.95px; left: 30.3899px;">
                             <textarea autocorrect="off" autocapitalize="off" spellcheck="false" readonly="" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"> </textarea>
                         </div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true">
                             <div style="min-width: 1px; height: 0px;"></div>
                         </div>
-                        <div> @result</div>
-                    </div>
+                       
+                    </div>*@
                 </div>
             </section>
         </div>
@@ -73,7 +78,12 @@
 
 @code {
     private static readonly string editorId = Data.Constants.csharpId;
+    private static readonly string resultId = Data.Constants.resultId;
     private string code { get; set; } = Data.Constants.defultCode;
     private string share { get; set; } = "分享代码";
     private string @s { get; set; } = "开发中……";
+    private string askGpt = "问问chatGpt?";
+
+    private string Result = "等待编译……";
+
 }

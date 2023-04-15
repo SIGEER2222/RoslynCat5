@@ -5,25 +5,22 @@ let languageId = "csharp";
 let monacoInterop = {};
 monacoInterop.editors = {};
 let defaultCode =
-[
-`using System;
-
-public class MyClass
+    [
+        `using System;
+class Program
 {
-	public static void Main(string[] args)
-	{
-		Console.WriteLine("欢迎使用RoslynCat");
-	}
+    static void Main(string[] args)
+    {
+        Console.WriteLine("欢迎使用RoslynCat");
+    }
 }`
-].join('\n');
+    ].join('\n');
 let sourceCode = localStorage.getItem('oldCode') ?? defaultCode;
 //创建和初始化编辑器
-monacoInterop.createEditor = (elementId, code) => {
-    if (code != defaultCode) {
-        sourceCode = code;
-    }
+
+function createEditor(elementId, value) {
     let editor = monaco.editor.create(document.getElementById(elementId), {
-        value: sourceCode,
+        value: value,
         language: languageId,
         theme: "vs-dark",
         tabSize: 4,
@@ -44,14 +41,26 @@ monacoInterop.createEditor = (elementId, code) => {
         contextmenu: true,
         copyWithSyntaxHighlighting: true,
     });
+    return editor;
+}
+monacoInterop.createEditor = (elementId, code) => {
+    let editor;
+    if (elementId == 'editorId') {
+        if (code != defaultCode) {
+            //sourceCode = code;
+        }
+        editor = createEditor(elementId, sourceCode);
+        monacoInterop.setMonarchTokensProvider();
+        monacoInterop.setLanguageConfiguration();
+        monacoInterop.CSharpRegister();
+
+    } else if (elementId = 'resultId') {
+        editor = createEditor(elementId, code);
+    }
     monacoInterop.editors[elementId] = editor;
-
-    monacoInterop.setMonarchTokensProvider();
-    monacoInterop.setLanguageConfiguration();
-    monacoInterop.CSharpRegister();
-
     console.log("初始化完毕")
 }
+
 
 monacoInterop.CSharpRegister = (elementId) => {
     let languageId = "csharp";

@@ -21,11 +21,8 @@ namespace RoslynCat.Controllers
         public async Task CreateGistAsync(string code) {
             if (code is null) return;
 
-            ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-            configurationBuilder.SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
-            var configuration = configurationBuilder.Build();
-            string token = configuration["gist"];
+            GetConfig config = new GetConfig();
+            string token = config.GistId;
 
             using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("GistExample","1.0"));

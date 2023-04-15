@@ -20,7 +20,6 @@ namespace RoslynCat.Pages
         [Inject] Roslyn.CompletionProvider CompletionProvider { get; set; }
         [Parameter] public string gistId { get; set; }
 
-        private string result = "等待编译...";
         private string shareId = string.Empty;
         Uri uri;
         protected override async void OnInitialized() {
@@ -47,10 +46,11 @@ namespace RoslynCat.Pages
             if (firstRender) {
                 JsRuntimeExt.Shared = JS;
                 if (gistId is object) {
-                   
                     code = await GistService.GetGistContentAsync(gistId);
                 }
+                Result = "等待编译……";
                 await JsRuntimeExt.Shared.CreateMonacoEditorAsync(editorId,code);
+                await JsRuntimeExt.Shared.CreateMonacoEditorAsync(resultId,Result);
                 await CompliterService.CreatCompilation(code);
                 await JsRuntimeExt.Shared.InvokeVoidAsync("monacoInterop.registerMonacoProviders",DotNetObjectReference.Create(this));
             }
@@ -65,7 +65,6 @@ namespace RoslynCat.Pages
 
         [JSInvokable("HoverInfoProvide")]
         public async Task<string> HoverInfoProvide(string code,int position) {
-
             SourceInfo sourceInfo = new SourceInfo(code,string.Empty,position);
             sourceInfo.Type = RequestType.Hover;
             await CompletionProvider.CreateProviderAsync(WorkSpaceService,sourceInfo);
@@ -85,8 +84,20 @@ namespace RoslynCat.Pages
 
         protected async Task Test() {
             code = await JsRuntimeExt.Shared.GetValue(editorId);
-            result = CompliterService.CompileAndRun(code);
-            await Console.Out.WriteLineAsync(result);
+            Result = CompliterService.CompileAndRun(code);
+            await JsRuntimeExt.Shared.SetValue(resultId,Result);
+            await Console.Out.WriteLineAsync(Result);
+        }
+
+        protected async Task AskGPT() {
+            string ask =  await JsRuntimeExt.Shared.GetValue(editorId);
+            Result = "思考中……请等待";
+            askGpt = "正在思考，请勿重复点击";
+            StateHasChanged();
+            await JsRuntimeExt.Shared.SetValue(resultId,Result);
+            Result = await new ChatGPT().Reply(ask);
+            await JsRuntimeExt.Shared.SetValue(resultId,Result);
+            askGpt = "问问ChatGPT?";
         }
         protected async Task CodeSharing() {
             code = await JsRuntimeExt.Shared.GetValue(editorId);
@@ -95,6 +106,10 @@ namespace RoslynCat.Pages
             await share.CreateGistAsync(code);
             shareId = "https://localhost:7175/codeshare/" + share.GistId;
             await JsRuntimeExt.Shared.CopyUrl();
+        }
+
+        private void OnMyParameterChanged() {
+            JsRuntimeExt.Shared.CreateMonacoEditorAsync(resultId,Result);
         }
 
         private void OnDiagnosticsUpdated(object sender,List<Diagnostic> diagnostics) {

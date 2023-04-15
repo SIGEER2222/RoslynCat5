@@ -24,7 +24,7 @@ namespace RoslynCat.Controllers
 
         public static async Task CreateMonacoEditorAsync(this IJSRuntime js,string editorId,string code) {
             await js.SafeInvokeAsync("monacoInterop.createEditor",editorId,code);
-        } 
+        }  
         
         public static async Task Test(this IJSRuntime js) {
             await js.SafeInvokeAsync("monacoInterop.Test");
@@ -32,6 +32,9 @@ namespace RoslynCat.Controllers
         
         public static async Task<string> GetValue(this IJSRuntime js,string editorId) {
             return await js.SafeInvokeAsync<string>("monacoInterop.getCode",editorId);
+        } 
+        public static async Task SetValue(this IJSRuntime js,string editorId,string code) {
+             await js.SafeInvokeAsync("monacoInterop.setCode",editorId,code);
         }
         public static async Task RegisterMonacoProvidersAsync(this IJSRuntime js,string editorId) {
             await js.SafeInvokeAsync("monacoInterop.change",editorId);
