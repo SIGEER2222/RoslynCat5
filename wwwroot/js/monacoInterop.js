@@ -23,9 +23,9 @@ let sourceCode = localStorage.getItem('oldCode') ?? defaultCode;
 monacoInterop.createEditor = (elementId, code) => {
     let editor;
     if (elementId == 'editorId') {
-        //if (code != defaultCode) {
-        //    //sourceCode = code;
-        //}
+        if (code != sourceCode) {
+            sourceCode = code;
+        }
         editor = module.createEditor(elementId, sourceCode);
         monacoInterop.setMonarchTokensProvider();
         monacoInterop.setLanguageConfiguration();
