@@ -22,27 +22,14 @@ namespace RoslynCat.Pages
 
         private string shareId = string.Empty;
         Uri uri;
+        string baseUri;
+
         protected override async void OnInitialized() {
             uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-            //if (true) {
-
-            //}
-            //if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("GistId",out var gistId)) {
-            //    code = await GistService.GetGistContentAsync(gistId);
-            //}
-            await Console.Out.WriteLineAsync("111");
+            baseUri = NavigationManager.BaseUri;
         }
 
-        //protected override async Task OnParametersSetAsync() {
-        //    //this.MonacoService.DiagnosticsUpdated += this.OnDiagnosticsUpdated;
-        //    if (gistId is object) {
-        //        code = await GistService.GetGistContentAsync(gistId);
-        //    }
-        //    base.OnParametersSet();
-        //}
-
         protected override async Task OnAfterRenderAsync(bool firstRender) {
-            await Console.Out.WriteLineAsync(typeof(Index).Assembly.FullName);
             if (firstRender) {
                 JsRuntimeExt.Shared = JS;
                 if (gistId is object) {
@@ -57,38 +44,33 @@ namespace RoslynCat.Pages
         }
 
         [JSInvokable("FormatCode")]
-        public async Task<string> FormatCode(string code) {
-            // 方法实现
-            string format = await CompletionProvider.FormatCode(code);
-            return format;
-        }
+        public async Task<string> FormatCode(string code) => await CompletionProvider.FormatCode(code);
 
         [JSInvokable("HoverInfoProvide")]
         public async Task<string> HoverInfoProvide(string code,int position) {
-            SourceInfo sourceInfo = new SourceInfo(code,string.Empty,position);
-            sourceInfo.Type = RequestType.Hover;
-            await CompletionProvider.CreateProviderAsync(WorkSpaceService,sourceInfo);
-            IResponse respone = await CompletionProvider.GetResultAsync();
+            IResponse respone = await Provider(code,position,RequestType.Hover);
             HoverInfoResult result = respone as HoverInfoResult;
             return JsonSerializer.Serialize(result);
         }
-        [JSInvokable("ProvideCompletionItems2")]
+        [JSInvokable("ProvideCompletionItems")]
         public async Task<string> ProvideCompletionItems(string code,int position) {
-            SourceInfo sourceInfo = new SourceInfo(code,string.Empty,position);
-            sourceInfo.Type = RequestType.Complete;
-            await CompletionProvider.CreateProviderAsync(WorkSpaceService,sourceInfo);
-            IResponse respone = await CompletionProvider.GetResultAsync();
+            IResponse respone = await Provider(code,position,RequestType.Complete);
             CompletionResult result = respone as CompletionResult;
             return JsonSerializer.Serialize(result.Suggestions);
-        } 
+        }
         [JSInvokable("GetModelMarkers")]
         public async Task<string> GetModelMarkers(string code,int position) {
-            SourceInfo sourceInfo = new SourceInfo(code,string.Empty,position);
-            sourceInfo.Type = RequestType.CodeCheck;
-            await CompletionProvider.CreateProviderAsync(WorkSpaceService,sourceInfo);
-            IResponse respone = await CompletionProvider.GetResultAsync();
+            IResponse respone = await Provider(code,position,RequestType.CodeCheck);
             CodeCheckResult result = respone as CodeCheckResult;
             return JsonSerializer.Serialize(result.codeChecks);
+        }
+
+        protected async Task<IResponse> Provider(string code,int position,RequestType request) {
+            SourceInfo sourceInfo = new SourceInfo(code,string.Empty,position);
+            sourceInfo.Type = request;
+            await CompletionProvider.CreateProviderAsync(WorkSpaceService,sourceInfo);
+            IResponse respone = await CompletionProvider.GetResultAsync();
+            return respone;
         }
 
         protected async Task Test() {
@@ -113,7 +95,7 @@ namespace RoslynCat.Pages
             if (string.IsNullOrEmpty(code)) return;
             CodeSharing share = new CodeSharing();
             await share.CreateGistAsync(code);
-            shareId = "https://localhost:7175/codeshare/" + share.GistId;
+            shareId = $" {baseUri}codeshare/{share.GistId}";
             await JsRuntimeExt.Shared.CopyUrl();
         }
 

@@ -1,14 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Completion;
+﻿using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.FindSymbols;
-using Microsoft.CodeAnalysis.Text;
 using RoslynCat.Interface;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Immutable;
-using System.Threading;
-using System.Xml.Linq;
 using static RoslynCat.Roslyn.HoverInfo;
 
 namespace RoslynCat.Roslyn

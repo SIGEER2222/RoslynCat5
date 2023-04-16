@@ -65,7 +65,7 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
     //
     async function getProvidersAsync(code, position) {
         let suggestions = [];
-        await dotNetObject.invokeMethodAsync('ProvideCompletionItems2', code, position).then(result => {
+        await dotNetObject.invokeMethodAsync('ProvideCompletionItems', code, position).then(result => {
             let r = JSON.parse(result);
             for (let key in r) {
                 suggestions.push({

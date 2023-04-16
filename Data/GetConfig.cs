@@ -1,5 +1,8 @@
 ﻿namespace RoslynCat.Data
 {
+    /// <summary>
+    /// 获取配置信息
+    /// </summary>
     public class GetConfig
     {
         private IConfigurationRoot _configuration;

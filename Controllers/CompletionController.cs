@@ -4,7 +4,9 @@ using RoslynCat.Roslyn;
 
 namespace RoslynCat.Controllers
 {
-
+    /// <summary>
+    /// 暂时弃用
+    /// </summary>
     [Route("completion")]
     [ApiController]
     public class CompletionController : ControllerBase

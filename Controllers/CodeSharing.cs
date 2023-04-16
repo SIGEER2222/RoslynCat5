@@ -18,6 +18,11 @@ namespace RoslynCat.Controllers
         public string GistId { get; set; }
         private string url = "https://api.github.com";
         
+        /// <summary>
+        /// 创建新的gist并设置值到GistId
+        /// </summary>
+        /// <param name="code">要上传的代码</param>
+        /// <returns></returns>
         public async Task CreateGistAsync(string code) {
             if (code is null) return;
 
@@ -44,6 +49,11 @@ namespace RoslynCat.Controllers
             GistId = createdGistUrl.Split('/').Last();
         }
 
+        /// <summary>
+        /// 解析gist中的代码
+        /// </summary>
+        /// <param name="gistId"></param>
+        /// <returns>如果能正确解析就返回gist中的代码，否则返回默认代码</returns>
         public async Task<string> GetGistContentAsync(string gistId) {
             if (gistId is null) return Constants.defultCode;
 

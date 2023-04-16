@@ -65,7 +65,6 @@ namespace RoslynCat.Data
                         else
                         {
                             downloadItem = item;
-
                         }
                         if (!String.IsNullOrWhiteSpace(version))
                         {
@@ -94,7 +93,6 @@ namespace RoslynCat.Data
                 {
                     url += $"/{version}";
                 }
-
 
                 var wc = new System.Net.WebClient();
                 wc.DownloadFile(url, $"{packageInstallationDirectory}//{packageName}.nuget");

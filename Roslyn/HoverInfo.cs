@@ -7,7 +7,12 @@ namespace RoslynCat.Roslyn
 
         public static class HoverInfoBuilder
         {
-
+            /// <summary>
+            /// TODO
+            /// 获取字面量的值和描述
+            /// </summary>
+            /// <param name="literal"></param>
+            /// <returns></returns>
             public static string Literal(LiteralExpressionSyntax literal) {
                 Type type = literal.Token.Value.GetType();
                 string literalValue = string.Empty;
@@ -24,6 +29,12 @@ namespace RoslynCat.Roslyn
                 }
                 return literalValue;
             }
+
+            /// <summary>
+            /// 获取符号的语义描述
+            /// </summary>
+            /// <param name="symbolInfo"></param>
+            /// <returns></returns>
             public static string Build(SymbolInfo symbolInfo) {
 
                 string s = symbolInfo.Symbol switch {
@@ -82,7 +93,6 @@ namespace RoslynCat.Roslyn
                     hierarchy.Add(currentType.Name);
                     currentType = currentType.BaseType;
                 }
-
                 hierarchy.Reverse();
                 return $"Inherits: {string.Join("->",hierarchy)}{Environment.NewLine}";
             }

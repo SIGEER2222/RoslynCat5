@@ -6,6 +6,9 @@ using RoslynCat.Interface;
 
 namespace RoslynCat.Roslyn
 {
+    /// <summary>
+    /// 创建项目和工作区
+    /// </summary>
     public class WorkSpaceService : IWorkSpaceService
     {
         private readonly AdhocWorkspace _workspace;
@@ -45,11 +48,18 @@ namespace RoslynCat.Roslyn
             //_document = _workspace.AddDocument(_project.Id,"RoslynCat.cs",SourceText.From(Constants.defultCode));
         }
 
-
+        /// <summary>
+        /// 获取文档的语义模型
+        /// </summary>
+        /// <returns></returns>
         public async Task<SemanticModel> GetSmanticModelAsync() {
             return await _document.GetSemanticModelAsync();
         }
 
+        /// <summary>
+        /// 获取文档的编译结果
+        /// </summary>
+        /// <returns></returns>
         public async Task<EmitResult> GetEmitResultAsync() {
             var model = await _document.GetSemanticModelAsync();
             var ms = new MemoryStream();
@@ -57,14 +67,15 @@ namespace RoslynCat.Roslyn
             return emitResult;
         }
 
+        /// <summary>
+        /// 更新文档（其实就是重新添加一次）
+        /// </summary>
+        /// <param name="newCode"></param>
         public async void OnDocumentChange(string newCode) {
-            //var documentId = _document.Id;
-            //var document = _workspace.CurrentSolution.GetDocument(documentId);
             var newSolution = _document.Project.Solution.WithDocumentText(_document.Id, SourceText.From(newCode));
             _workspace.TryApplyChanges(newSolution);
-            var text = await _document.GetTextAsync();
-            //_project.RemoveDocument(_document.Id);
             _document = _project.AddDocument("RoslynCat.cs",SourceText.From(newCode));
+            Console.WriteLine(_project.DocumentIds.Count());
         }
 
         //TODO

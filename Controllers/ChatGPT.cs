@@ -7,6 +7,11 @@ namespace RoslynCat.Controllers
 {
     public class ChatGPT
     {
+        /// <summary>
+        /// 向OpenAI发送请求，模型是ChatGpt3_5Turbo
+        /// </summary>
+        /// <param name="userText">问题</param>
+        /// <returns>回复</returns>
         public async Task<string> Reply(string userText) {
             string result = string.Empty;
 

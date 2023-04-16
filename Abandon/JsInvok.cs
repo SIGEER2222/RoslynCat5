@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 using Microsoft.JSInterop;
 using System.Reflection.Emit;
 
-namespace RoslynCat.Hub
+namespace RoslynCat.Abandon
 {
     public class JsInvok
     {
