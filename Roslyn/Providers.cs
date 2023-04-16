@@ -41,7 +41,6 @@ namespace RoslynCat.Roslyn
     public class HoverProvider : IHoverProvider
     {
         public async Task<HoverInfoResult> Provide(Document document,int position,SemanticModel semanticModel) {
-            //Microsoft.CodeAnalysis.TypeInfo typeInfo;
             SyntaxNode expressionNode = semanticModel.SyntaxTree.GetRoot().FindToken(position).Parent;
             string result = expressionNode switch{
                 VariableDeclaratorSyntax vd => $"Variable: {vd.Identifier.Text} ({semanticModel.GetTypeInfo(vd).Type})",

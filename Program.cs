@@ -21,6 +21,7 @@ builder.Services.AddTransient<ICompleteProvider,CompleteProvider>();
 //builder.Services.AddScoped<ISignatureProvider,SignatureProvider>();
 builder.Services.AddTransient<IHoverProvider,HoverProvider>();
 builder.Services.AddTransient<ICodeCheckProvider,CodeCheckProvider>();
+builder.Services.AddHttpClient();
 builder.Services.AddTransient<IGistService,CodeSharing>();
 builder.Services.AddTransient<CompletionProvider>();
 

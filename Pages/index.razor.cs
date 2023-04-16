@@ -35,6 +35,9 @@ namespace RoslynCat.Pages
                 if (gistId is object) {
                     code = await GistService.GetGistContentAsync(gistId);
                 }
+                else {
+                  code =  await JsRuntimeExt.Shared.GetOldCode();
+                }
                 Result = "µÈ´ý±àÒë¡­¡­";
                 await JsRuntimeExt.Shared.CreateMonacoEditorAsync(editorId,code);
                 await JsRuntimeExt.Shared.CreateMonacoEditorAsync(resultId,Result);
@@ -93,10 +96,9 @@ namespace RoslynCat.Pages
         protected async Task CodeSharing() {
             code = await JsRuntimeExt.Shared.GetValue(editorId);
             if (string.IsNullOrEmpty(code)) return;
-            CodeSharing share = new CodeSharing();
-            await share.CreateGistAsync(code);
-            shareId = $" {baseUri}codeshare/{share.GistId}";
-            await JsRuntimeExt.Shared.CopyUrl();
+            await GistService.CreateGistAsync(code);
+            shareId = $" {baseUri}codeshare/{GistService.GistId}";
+            await JsRuntimeExt.Shared.CopyUrl(shareId);
         }
 
         private void OnMyParameterChanged() {

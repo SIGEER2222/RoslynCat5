@@ -18,12 +18,15 @@ class Program
     ].join('\n');
 let sourceCode = localStorage.getItem('oldCode') ?? defaultCode;
 
-
+monacoInterop.getOldCode = () => {
+    return localStorage.getItem('oldCode');
+}
 //创建和初始化编辑器
 monacoInterop.createEditor = (elementId, code) => {
     let editor;
+    console.log('source:' + code);
     if (elementId == 'editorId') {
-        if (code != sourceCode) {
+        if (code != defaultCode) {
             sourceCode = code;
         }
         editor = module.createEditor(elementId, sourceCode);
@@ -319,6 +322,7 @@ monacoInterop.copyText = (text) => {
     var modal = document.getElementById("myModal");
     var span = document.getElementsByClassName("close")[0];
 
+    console.log(text)
     navigator.clipboard.writeText(text)
         .then(() => {
             modal.style.display = "block";
