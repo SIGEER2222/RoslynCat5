@@ -12,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
+builder.Services.AddOptions();
+
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGenNewtonsoftSupport();
@@ -21,10 +23,13 @@ builder.Services.AddTransient<ICompleteProvider,CompleteProvider>();
 //builder.Services.AddScoped<ISignatureProvider,SignatureProvider>();
 builder.Services.AddTransient<IHoverProvider,HoverProvider>();
 builder.Services.AddTransient<ICodeCheckProvider,CodeCheckProvider>();
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("GithubApi", client =>
+{
+    client.BaseAddress = new Uri("https://api.github.com");
+});
 builder.Services.AddTransient<IGistService,CodeSharing>();
 builder.Services.AddTransient<CompletionProvider>();
-
+// æ³¨é‡Š
 //builder.Services.AddSwaggerGen(swagger =>
 //{
 //    swagger.SwaggerDoc("v1",new OpenApiInfo {
@@ -43,7 +48,7 @@ if (!app.Environment.IsDevelopment()) {
     app.UseHsts();
 }
 
-//¿ª·¢»·¾³ÏÂÊ¹ÓÃswagger
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½swagger
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();

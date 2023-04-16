@@ -5,6 +5,7 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json.Nodes;
 
 namespace RoslynCat.Controllers
 {
@@ -15,11 +16,14 @@ namespace RoslynCat.Controllers
         public string Description { get; set; } = "Testing...";
         public string Code { get; set; }
         public string GistId { get; set; }
-        private string url = "https://api.github.com";
-        private IHttpClientFactory _httpClientFactory;
+        private HttpClient _githubClient;
 
         public CodeSharing(IHttpClientFactory httpClientFactory) {
-            _httpClientFactory = httpClientFactory;
+            _githubClient = httpClientFactory.CreateClient("GithubApi");
+            GetConfig config = new GetConfig();
+            string token = config.GistId;
+            _githubClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("GistExample","1.0"));
+            _githubClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token",token);
         }
         /// <summary>
         /// 创建新的gist并设置值到GistId
@@ -29,11 +33,8 @@ namespace RoslynCat.Controllers
         public async Task CreateGistAsync(string code) {
             if (code is null) return;
 
-            GetConfig config = new GetConfig();
-            string token = config.GistId;
-            var httpClient = _httpClientFactory.CreateClient();
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("GistExample","1.0"));
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token",token);
+            
+            
 
             var createGistContent = new JObject
             {
@@ -41,13 +42,9 @@ namespace RoslynCat.Controllers
                 {"public", true},
                 {"files", new JObject {{ FileName, new JObject {{"content",code } }}}}
             };
-            var createGistResponse = await httpClient.PostAsync(
-                $"{url}/gists",
-                new StringContent(createGistContent.ToString(), Encoding.UTF8, "application/json"));
-            createGistResponse.EnsureSuccessStatusCode();
-
-            var createdGist = JObject.Parse(await createGistResponse.Content.ReadAsStringAsync());
-            var createdGistUrl = createdGist["html_url"].Value<string>();
+            var createGistResponse = await _githubClient.PostAsJsonAsync("/gists", createGistContent);
+            var result = await createGistResponse.Content.ReadFromJsonAsync<JsonObject>();
+            var createdGistUrl = result["html_url"].AsValue().ToJsonString();
             GistId = createdGistUrl.Split('/').Last();
         }
 
@@ -64,13 +61,9 @@ namespace RoslynCat.Controllers
                 .AddJsonFile("appsettings.json");
             var configuration = configurationBuilder.Build();
             string token = configuration["gist"];
-
-            var httpClient = _httpClientFactory.CreateClient();
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("GistExample","1.0"));
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token",token);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var getGistResponse = await httpClient.GetAsync($"{url}/gists/{gistId}");
+            var getGistResponse = await _githubClient.GetAsync($"/gists/{gistId}");
 
             stopwatch.Stop();
             Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
