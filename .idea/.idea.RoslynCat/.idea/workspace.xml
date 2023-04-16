@@ -9,7 +9,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9dc19033-662c-4b19-b677-c7512696318a" name="Changes" comment="测试">
+      <change afterPath="$PROJECT_DIR$/RoslynCat.Commons/RoslynCat.Commons.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/RoslynCat.Commons/Web/BaseHttpClientService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.RoslynCat/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.RoslynCat/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Controllers/CodeSharing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/CodeSharing.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RoslynCat.sln" beforeDir="false" afterPath="$PROJECT_DIR$/RoslynCat.sln" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +99,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1681630382914</updated>
-      <workItem from="1681630390951" duration="923000" />
+      <workItem from="1681630390951" duration="2647000" />
     </task>
     <task id="LOCAL-00001" summary="测试">
       <created>1681630516573</created>

@@ -12,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
+builder.Services.AddOptions();
+
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGenNewtonsoftSupport();
@@ -21,7 +23,10 @@ builder.Services.AddTransient<ICompleteProvider,CompleteProvider>();
 //builder.Services.AddScoped<ISignatureProvider,SignatureProvider>();
 builder.Services.AddTransient<IHoverProvider,HoverProvider>();
 builder.Services.AddTransient<ICodeCheckProvider,CodeCheckProvider>();
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("GithubApi", client =>
+{
+    client.BaseAddress = new Uri("https://api.github.com");
+});
 builder.Services.AddTransient<IGistService,CodeSharing>();
 builder.Services.AddTransient<CompletionProvider>();
 // 注释
