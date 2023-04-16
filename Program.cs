@@ -23,7 +23,7 @@ builder.Services.AddTransient<IHoverProvider,HoverProvider>();
 builder.Services.AddTransient<ICodeCheckProvider,CodeCheckProvider>();
 builder.Services.AddTransient<IGistService,CodeSharing>();
 builder.Services.AddTransient<CompletionProvider>();
-
+// æ³¨é‡Š
 //builder.Services.AddSwaggerGen(swagger =>
 //{
 //    swagger.SwaggerDoc("v1",new OpenApiInfo {
@@ -42,7 +42,7 @@ if (!app.Environment.IsDevelopment()) {
     app.UseHsts();
 }
 
-//¿ª·¢»·¾³ÏÂÊ¹ÓÃswagger
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½swagger
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
