@@ -71,9 +71,8 @@ namespace RoslynCat.Roslyn
                 var isSealed = typeSymbol.IsSealed ? "cannot be inherited" : "can be inherited";
                 var inheritance = GetInheritanceHierarchy(typeSymbol);
                 var result = $"{typeSymbol.ToDisplayString()} class{Environment.NewLine}" +
-        $" Represents {accessModifier} {isSealed}.{Environment.NewLine}" +
-        $"{inheritance}";
-
+                             $" Represents {accessModifier} {isSealed}.{Environment.NewLine}" +
+                             $"{inheritance}";
                 return result;
             }
 
@@ -81,8 +80,7 @@ namespace RoslynCat.Roslyn
                 if (symbol is null) {
                     return string.Empty;
                 }
-                var result = $"{symbol.Name} keyword{Environment.NewLine}" +
-        $" Represents a {symbol.Kind} keyword.{Environment.NewLine}";
+                var result = $"{symbol.Name} : keyword{Environment.NewLine} Represents a {symbol.Kind} keyword.{Environment.NewLine}";
                 return result;
             }
 

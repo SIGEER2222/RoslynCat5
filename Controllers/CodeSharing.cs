@@ -14,10 +14,13 @@ namespace RoslynCat.Controllers
         public string FileName { get; set; } = "UserCode.cs";
         public string Description { get; set; } = "Testing...";
         public string Code { get; set; }
-        
         public string GistId { get; set; }
         private string url = "https://api.github.com";
-        
+        private IHttpClientFactory _httpClientFactory;
+
+        public CodeSharing(IHttpClientFactory httpClientFactory) {
+            _httpClientFactory = httpClientFactory;
+        }
         /// <summary>
         /// 创建新的gist并设置值到GistId
         /// </summary>
@@ -28,8 +31,7 @@ namespace RoslynCat.Controllers
 
             GetConfig config = new GetConfig();
             string token = config.GistId;
-
-            using var httpClient = new HttpClient();
+            var httpClient = _httpClientFactory.CreateClient();
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("GistExample","1.0"));
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token",token);
 
@@ -63,7 +65,7 @@ namespace RoslynCat.Controllers
             var configuration = configurationBuilder.Build();
             string token = configuration["gist"];
 
-            HttpClient httpClient = new HttpClient();
+            var httpClient = _httpClientFactory.CreateClient();
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("GistExample","1.0"));
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token",token);
             var stopwatch = new Stopwatch();
