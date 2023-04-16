@@ -27,7 +27,7 @@
                     <button @onclick="Test">运行</button>
                     <button @onclick="CodeSharing">分享代码</button>
                     <button @onclick="AskGPT">@askGpt</button>
-                    <label style="display:none;"> @s</label>
+                    @*<label style="display:none;"> @s</label>*@
                 </header>
                 <div id="@editorId" class="monaco"></div>
             </section>
@@ -82,7 +82,7 @@
     private string code { get; set; } = Data.Constants.defultCode;
     private string share { get; set; } = "分享代码";
     private string @s { get; set; } = "开发中……";
-    private string askGpt = "问问chatGpt?";
+    private string askGpt = "问问ChatGPT?";
 
     private string Result = "等待编译……";
 
