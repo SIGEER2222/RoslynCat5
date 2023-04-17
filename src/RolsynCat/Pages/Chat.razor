@@ -1,0 +1,70 @@
+﻿@page "/chat"
+@using Markdig
+
+<div class="chat-container">
+    <div class="chat-messages">
+        @foreach (var message in Messages) {
+            <div class="chat-message @(message.IsSystemMessage ? "system-message" : "user-message")">
+                <div class="message-bubble">
+                    @if (message.IsSystemMessage) {
+
+                        <div>@((MarkupString)htmlText)</div>
+                    }
+                    else {
+                        <p>@message.Text</p>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+    <div class="chat-input">
+        <input type="text" @bind="@CurrentMessage" placeholder="Type your message here...">
+        <button class="send-button" @onclick="SendMessage">Send</button>
+    </div>
+</div>
+
+@code {
+    private List<Message> Messages = new List<Message>();
+    private string CurrentMessage;
+
+    private class Message
+    {
+        public string Text { get; set; }
+        public bool IsSystemMessage { get; set; }
+
+    }
+
+    private void SendMessage() {
+        if (!string.IsNullOrWhiteSpace(CurrentMessage)) {
+            UpdateHtmlText();
+            Messages.Add(new Message { Text = CurrentMessage,IsSystemMessage = false });
+            Messages.Add(new Message { Text = CurrentMessage,IsSystemMessage = true });
+            Messages.Add(new Message { Text = htmlText,IsSystemMessage = true });
+            CurrentMessage = "";
+        }
+    }
+
+    private string htmlText = "";
+    private string markdownText =$@"# 这是一个标题
+
+这是一段普通文本。
+
+## 这是一个二级标题  ## 这是一个二级标题  ## 这是一个二级标题  ## 这是一个二级标题
+
+- 这是一个无序列表项
+- 这是另一个无序列表项
+
+1. 这是一个有序列表项
+2. 这是另一个有序列表项
+
+[这是一个链接](https://www.example.com)
+
+**这是粗体文本**
+
+*这是斜体文本*";
+
+    private void UpdateHtmlText() {
+        var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+        htmlText = Markdown.ToHtml(markdownText,pipeline);
+    }
+}

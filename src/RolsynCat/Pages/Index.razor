@@ -24,7 +24,7 @@
                 <div id="@editorId" class="monaco"></div>
             </section>
         </div>
-        <div class="top-section-group top-section-group-results" >
+        <div class="top-section-group top-section-group-results">
             <section class="top-section result">
                 <header>
 
@@ -35,13 +35,22 @@
                             <option value="auto">自动</option>
                         </select>
                     </div>
-
+                    <button @onclick="ShowMyComponent">Open My Component</button>
+                    @if (IsMyComponentVisible) {
+                        <div class="my-component-modal">
+                            <div class="my-component-content">
+                                <button class="close-button" @onclick="HideMyComponent">Close</button>
+                               <Chat> </Chat>
+                            </div>
+                        </div>
+                    }
                 </header>
-                <div id="@resultId" class="monaco"> 
+                <div id="@resultId" class="monaco">
                 </div>
             </section>
         </div>
     </main>
+
     <footer>
         <a href="https://github.com/SIGEER2222/RoslynCat">RolsynCat in Github</a>
     </footer>
@@ -56,5 +65,15 @@
     private string askGpt = "问问ChatGPT?";
 
     private string Result = "等待编译……";
+
+    private bool IsMyComponentVisible = false;
+
+    private void ShowMyComponent() {
+        IsMyComponentVisible = true;
+    }
+
+    private void HideMyComponent() {
+        IsMyComponentVisible = false;
+    }
 
 }
