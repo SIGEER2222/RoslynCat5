@@ -1,10 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using RoslynCat.Interface;
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json.Nodes;
 
 namespace RoslynCat.Controllers
@@ -32,20 +28,16 @@ namespace RoslynCat.Controllers
         /// <returns></returns>
         public async Task CreateGistAsync(string code) {
             if (code is null) return;
-
-            
-            
-
             var createGistContent = new JObject
             {
                 {"description", Description},
                 {"public", true},
                 {"files", new JObject {{ FileName, new JObject {{"content",code } }}}}
             };
-            var createGistResponse = await _githubClient.PostAsJsonAsync("/gists", createGistContent);
-            var result = await createGistResponse.Content.ReadFromJsonAsync<JsonObject>();
-            var createdGistUrl = result["html_url"].AsValue().ToJsonString();
-            GistId = createdGistUrl.Split('/').Last();
+            //var createGistResponse = await _githubClient.PostAsJsonAsync("/gists", createGistContent);
+            var response = await _githubClient.PostAsync("/gists", new StringContent(createGistContent.ToString()));
+            var result = await response.Content.ReadFromJsonAsync<JsonObject>();
+            GistId = result["id"].AsValue().ToJsonString();
         }
 
         /// <summary>
@@ -56,23 +48,21 @@ namespace RoslynCat.Controllers
         public async Task<string> GetGistContentAsync(string gistId) {
             if (gistId is null) return Constants.defultCode;
 
-            ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-            configurationBuilder.SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
-            var configuration = configurationBuilder.Build();
-            string token = configuration["gist"];
             var stopwatch = new Stopwatch();
             stopwatch.Start();
+
             var getGistResponse = await _githubClient.GetAsync($"/gists/{gistId}");
 
             stopwatch.Stop();
             Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
+
             if (getGistResponse.IsSuccessStatusCode) {
                 getGistResponse.EnsureSuccessStatusCode();
                 var gist = JObject.Parse(await getGistResponse.Content.ReadAsStringAsync());
                 var gistContent = gist["files"][FileName]["content"].Value<string>();
                 return gistContent;
             }
+
             else { return Constants.defultCode; }
         }
     }

@@ -1,10 +1,5 @@
 using RoslynCat.Roslyn;
 using RoslynCat.Controllers;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
-using Autofac.Core;
-using RoslynCat;
 using RoslynCat.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,36 +18,27 @@ builder.Services.AddTransient<ICompleteProvider,CompleteProvider>();
 //builder.Services.AddScoped<ISignatureProvider,SignatureProvider>();
 builder.Services.AddTransient<IHoverProvider,HoverProvider>();
 builder.Services.AddTransient<ICodeCheckProvider,CodeCheckProvider>();
+
 builder.Services.AddHttpClient("GithubApi", client =>
 {
     client.BaseAddress = new Uri("https://api.github.com");
 });
+
 builder.Services.AddTransient<IGistService,CodeSharing>();
 builder.Services.AddTransient<CompletionProvider>();
-// 注释
-//builder.Services.AddSwaggerGen(swagger =>
-//{
-//    swagger.SwaggerDoc("v1",new OpenApiInfo {
-//        Title = "CompletionApi"
-//    });
-//});
 
-//builder.Services.AddTransient<CompletionDocument>();
-//builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
-//builder.Host.ConfigureContainer<ContainerBuilder>(builder => builder.RegisterModule(new MyApplicationModule()));
 var app = builder.Build();
-//builder.Services.AddControllersWithViews()
 
 if (!app.Environment.IsDevelopment()) {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-//����������ʹ��swagger
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
