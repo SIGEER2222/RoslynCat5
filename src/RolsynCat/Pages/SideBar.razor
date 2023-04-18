@@ -1,0 +1,72 @@
+﻿@page "/sidebar"
+
+<div class="sidebar" style="@(_sidebarVisible ? "display: block;" : "")">
+    <button @onclick="ToggleSidebar">Toggle Sidebar</button>
+    <ul>
+        @foreach (var group in Groups) {
+            <li>
+                <h3>@group.Name</h3>
+                <ul>
+                    @foreach (var item in group.Items) {
+                        <li>
+                            <a href="@item.Url">@item.Name</a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    private bool _sidebarVisible = true;
+
+    private void ToggleSidebar() {
+        _sidebarVisible = !_sidebarVisible;
+    }
+    public class SidebarGroup
+    {
+        public string Name { get; set; }
+        public List<SidebarItem> Items { get; set; }
+    }
+
+    public class SidebarItem
+    {
+        public string Name { get; set; }
+        public string Url { get; set; }
+    }
+
+    private List<SidebarGroup> Groups = new List<SidebarGroup>
+    {
+        new SidebarGroup
+        {
+            Name = "Group 1",
+            Items = new List<SidebarItem>
+            {
+                new SidebarItem { Name = "Item 1", Url = "#" },
+                new SidebarItem { Name = "Item 2", Url = "#" },
+                new SidebarItem { Name = "Item 3", Url = "#" }
+            }
+        },
+        new SidebarGroup
+        {
+            Name = "Group 2",
+            Items = new List<SidebarItem>
+            {
+                new SidebarItem { Name = "Item 4", Url = "#" },
+                new SidebarItem { Name = "Item 5", Url = "#" }
+            }
+        },
+        new SidebarGroup
+        {
+            Name = "Group 3",
+            Items = new List<SidebarItem>
+            {
+                new SidebarItem { Name = "Item 6", Url = "#" },
+                new SidebarItem { Name = "Item 7", Url = "#" },
+                new SidebarItem { Name = "Item 8", Url = "#" }
+            }
+        }
+    };
+}
+

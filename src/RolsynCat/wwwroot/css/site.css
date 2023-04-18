@@ -6,6 +6,7 @@ div {
     border-radius: 5px;
 }
 
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -194,3 +195,42 @@ div {
     font-size: 16px;
     cursor: pointer;
 }
+
+
+/*²à±ßÀ¸*/
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 250px;
+    background-color: #f2f2f2;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding: 10px;
+    z-index: 1;
+}
+
+    .sidebar ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .sidebar ul li h3 {
+            margin: 10px 0;
+        }
+
+        .sidebar ul li ul {
+            margin: 0;
+            padding: 0;
+        }
+
+            .sidebar ul li ul li {
+                margin: 5px 0;
+            }
+
+    .sidebar button {
+        display: block;
+        margin-bottom: 10px;
+    }
