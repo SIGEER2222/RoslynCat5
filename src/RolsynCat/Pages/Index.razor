@@ -4,57 +4,43 @@
 @using RoslynCat.Data
 @inject NavigationManager NavigationManager
 
-<body class="theme-dark root-status-default">
-    <main>
-        <div id="myModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <p>分享地址已复制到剪切板：@shareId</p>
+
+<div class="container">
+    <div class="title-bar">
+        <div class="editor-head">
+            <button @onclick="Test">运行</button>
+            <button @onclick="CodeSharing">分享代码</button>
+            <button @onclick="ShowMyComponent">问问GPT？</button>
+
+            @if (IsMyComponentVisible) {
+                <div class="my-component-modal">
+                    <div class="my-component-content">
+                        <button class="close-button" @onclick="HideMyComponent">关闭</button>
+                        <Chat/> 
+                    </div>
+                </div>
+            }
+            <Dropdown />
+            <a class="" href="https://github.com/SIGEER2222/RoslynCat">RolsynCat in Github</a>
+        </div>
+    </div>
+    <div class="split-container">
+        <div class="left-pane resizable">
+            <div id="@editorId" class="monaco"></div>
+        </div>
+
+        <div class="right-pane resizable">
+            <div id="@resultId" class="monaco">
             </div>
         </div>
-        <button class="mobile-settings-button" aria-label="Settings" tabindex="1"></button><div class="mobile-offline-notice">connection lost, reconnecting…</div>
-        <div class="top-section-group top-section-group-code">
-
-            <section class="top-section code">
-                <header id="title">
-                    <button @onclick="Test">运行</button>
-                    <button @onclick="CodeSharing">分享代码</button>
-                    <button @onclick="AskGPT">@askGpt</button>
-                </header>
-                <div id="@editorId" class="monaco"></div>
-            </section>
+    </div>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>分享地址已复制到剪切板：@shareId</p>
         </div>
-        <div class="top-section-group top-section-group-results">
-            <section class="top-section result">
-                <header>
-
-                    <h1>编译模式</h1>
-                    <div class="select-wrapper option-language option online-only">
-                        <select aria-label="Code Language" tabindex="1">
-                            <option value="option">手动</option>
-                            <option value="auto">自动</option>
-                        </select>
-                    </div>
-                    <button @onclick="ShowMyComponent">Open My Component</button>
-                    @if (IsMyComponentVisible) {
-                        <div class="my-component-modal">
-                            <div class="my-component-content">
-                                <button class="close-button" @onclick="HideMyComponent">Close</button>
-                               <Chat> </Chat>
-                            </div>
-                        </div>
-                    }
-                </header>
-                <div id="@resultId" class="monaco">
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <footer>
-        <a href="https://github.com/SIGEER2222/RoslynCat">RolsynCat in Github</a>
-    </footer>
-</body>
+    </div>
+</div>
 
 @code {
     private static readonly string editorId = Data.Constants.csharpId;
@@ -75,5 +61,4 @@
     private void HideMyComponent() {
         IsMyComponentVisible = false;
     }
-
 }

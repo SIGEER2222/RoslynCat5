@@ -72,6 +72,9 @@ namespace RoslynCat.Roslyn
         /// </summary>
         /// <param name="newCode"></param>
         public async void OnDocumentChange(string newCode) {
+            if (string.IsNullOrWhiteSpace(newCode)) {
+                return;
+            }
             var newSolution = _document.Project.Solution.WithDocumentText(_document.Id, SourceText.From(newCode));
             _workspace.TryApplyChanges(newSolution);
             _document = _project.AddDocument("RoslynCat.cs",SourceText.From(newCode));
@@ -80,7 +83,6 @@ namespace RoslynCat.Roslyn
 
         //TODO
         private void AddUsings(string usings) {
-
             //DownloadNugetPackages.DownloadAllPackages(sourceInfo.Nuget);
             //var assemblies = DownloadNugetPackages.LoadPackages(sourceInfo.Nuget);
             //ScriptOptions.Default.AddReferences(usings).AddReferences(DefaultMetadataReferences);

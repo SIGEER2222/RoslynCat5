@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RoslynCat.Interface;
 
 namespace RoslynCat.Roslyn
@@ -46,6 +47,38 @@ namespace RoslynCat.Roslyn
             CompilationUnitSyntax root = syntaxTree.GetCompilationUnitRoot();
             SyntaxNode formattedNode = root.NormalizeWhitespace();
             return formattedNode.ToFullString();
+        }
+
+        public async Task<string> RunCode(string code , string read = "") {
+
+            string res = string.Empty;
+            var syntaxTree = await document.GetSyntaxTreeAsync();
+            using (MemoryStream ms = new MemoryStream()) {
+
+                if (!emitResult.Success) {
+                    res = string.Join(Environment.NewLine,emitResult.Diagnostics
+                           .Where(diagnostic => diagnostic.IsWarningAsError || diagnostic.Severity == DiagnosticSeverity.Error)
+                           .Select(diagnostic => $"{syntaxTree.GetLineSpan(diagnostic.Location.SourceSpan).StartLinePosition.Line + 1} : {diagnostic.Id}, {diagnostic.GetMessage()}"));
+                }
+
+                else {
+                    ms.Seek(0,SeekOrigin.Begin);
+                    var assembly = System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(ms);
+                    var entryPoint = assembly.EntryPoint;
+
+                    StringWriter writer = new StringWriter();
+                    var stdout = Console.Out; // 保存标准输出流
+                    Console.SetOut(writer); // 将输出流更改为文本写入器
+
+                    Console.SetIn(new StringReader(read));
+
+                    entryPoint?.Invoke(null,new object[] { new string[] { } });
+                    res = writer.ToString();
+                    writer.Close(); // 关闭文本写入器
+                    Console.SetOut(stdout); // 将输出流还原为标准输出流
+                }
+                return res;
+            }
         }
     }
 }

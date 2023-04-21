@@ -7,6 +7,10 @@ using System.Numerics;
 
 namespace RoslynCat.Roslyn
 {
+    /// <summary>
+    /// 创建工作区、添加dll引用
+    /// TODO添加using引用
+    /// </summary>
     public class CompletionWorkspace
     {
         private Project _project;

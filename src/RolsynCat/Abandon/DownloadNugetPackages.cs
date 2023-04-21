@@ -1,5 +1,6 @@
 ﻿//using NuGet;
-namespace RoslynCat.Data
+
+namespace RoslynCat.Abandon
 {
     public static class DownloadNugetPackages
     {
@@ -8,7 +9,7 @@ namespace RoslynCat.Data
         public static List<Assembly> LoadPackages(string packages)
         {
             List<Assembly> assemblies = new List<Assembly>();
-            if (!String.IsNullOrWhiteSpace(packages))
+            if (!string.IsNullOrWhiteSpace(packages))
             {
 
                 string[] npackages = packages.Split(';');
@@ -28,7 +29,7 @@ namespace RoslynCat.Data
                     }
                     var path = $"{installationDirectory}//{downloadItem}";
 
-                    var files = System.IO.Directory.GetFiles(path, "*.dll", SearchOption.AllDirectories);
+                    var files = Directory.GetFiles(path, "*.dll", SearchOption.AllDirectories);
                     foreach (var file in files)
                     {
                         try
@@ -48,12 +49,12 @@ namespace RoslynCat.Data
         }
         public static void DownloadAllPackages(string packages)
         {
-            if (!String.IsNullOrWhiteSpace(packages))
+            if (!string.IsNullOrWhiteSpace(packages))
             {
                 string[] npackages = packages.Split(';');
                 foreach (var item in npackages)
                 {
-                    if (!String.IsNullOrWhiteSpace(item))
+                    if (!string.IsNullOrWhiteSpace(item))
                     {
                         string downloadItem = "";
                         string version = "";
@@ -66,7 +67,7 @@ namespace RoslynCat.Data
                         {
                             downloadItem = item;
                         }
-                        if (!String.IsNullOrWhiteSpace(version))
+                        if (!string.IsNullOrWhiteSpace(version))
                         {
                             DownloadPackage(downloadItem, version);
                         }
@@ -81,15 +82,15 @@ namespace RoslynCat.Data
         public static void DownloadPackage(string packageName, string version)
         {
             string packageInstallationDirectory = installationDirectory + $"//{packageName}";
-            if (!System.IO.File.Exists($"{packageInstallationDirectory}//{packageName}.nuget"))
+            if (!File.Exists($"{packageInstallationDirectory}//{packageName}.nuget"))
             {
-                if (!System.IO.Directory.Exists(packageInstallationDirectory))
+                if (!Directory.Exists(packageInstallationDirectory))
                 {
-                    System.IO.Directory.CreateDirectory(packageInstallationDirectory);
+                    Directory.CreateDirectory(packageInstallationDirectory);
                 }
                 //https://www.nuget.org/api/v2/package/NuGet.Core/2.14.0
                 string url = "https://packages.nuget.org/api/v2/package/" + $"{packageName}";
-                if (!String.IsNullOrWhiteSpace(version))
+                if (!string.IsNullOrWhiteSpace(version))
                 {
                     url += $"/{version}";
                 }

@@ -34,4 +34,9 @@ class Program
             MetadataReference.CreateFromFile(typeof(System.Linq.Expressions.Expression).Assembly.Location)
         };
     }
+    public class Dialogue
+    {
+        public string ask { get; set; } = string.Empty;
+        public string message { get; set; } = string.Empty;
+    }
 }
