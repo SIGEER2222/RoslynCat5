@@ -62,13 +62,7 @@ namespace RoslynCat.Roslyn
             }
         }
 
-        /// <summary>
-        /// 运行C#代码并返回结果
-        /// </summary>
-        /// <param name="code"></param>
-        /// <param name="read"></param>
-        /// <returns></returns>
-        public  string CompileAndRun(string code,string read = "") {
+        public  string CompileAndRun(string code) {
             string res = string.Empty;
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code);
             string assemblyName = Path.GetRandomFileName();
@@ -85,11 +79,13 @@ namespace RoslynCat.Roslyn
                 if (!emitresult.Success) {
                     IEnumerable<Diagnostic> failures = emitresult.Diagnostics
                         .Where(diagnostic =>diagnostic.IsWarningAsError || diagnostic.Severity == DiagnosticSeverity.Error);
-                    
                     foreach (Diagnostic diagnostic in failures) {
-                        var span =syntaxTree.GetLineSpan(diagnostic.Location.SourceSpan);
-                        int line = span.StartLinePosition.Line + 1;
-                        res += $"{line} : {diagnostic.Id}, {diagnostic.GetMessage()}" + Environment.NewLine;
+                        int a,b;
+                        a = diagnostic.Location.SourceSpan.Start;
+                        b = diagnostic.Location.SourceSpan.End;
+                        res = $" {diagnostic.Id}, {diagnostic.GetMessage()}";
+                        Console.WriteLine($"{a},{b}");
+                        Console.Error.WriteLine("{0}: {1}",diagnostic.Id,diagnostic.GetMessage());
                     }
                 }
                 else {
@@ -100,8 +96,6 @@ namespace RoslynCat.Roslyn
                     StringWriter writer = new StringWriter();
                     var stdout = Console.Out; // 保存标准输出流
                     Console.SetOut(writer); // 将输出流更改为文本写入器
-                   
-                    Console.SetIn(new StringReader(read));
 
                     entryPoint?.Invoke(null,new object[] { new string[] { } });
                     res = writer.ToString();

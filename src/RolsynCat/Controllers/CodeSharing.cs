@@ -37,7 +37,7 @@ namespace RoslynCat.Controllers
             //var createGistResponse = await _githubClient.PostAsJsonAsync("/gists", createGistContent);
             var response = await _githubClient.PostAsync("/gists", new StringContent(createGistContent.ToString()));
             var result = await response.Content.ReadFromJsonAsync<JsonObject>();
-            GistId = result["id"].AsValue().ToString();
+            GistId = result["id"].AsValue().ToJsonString();
         }
 
         /// <summary>
