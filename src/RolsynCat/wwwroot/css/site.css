@@ -3,7 +3,7 @@
     width: 100%;
 }
 div {
-    border-radius: 5px;
+    /*border-radius: 5px;*/
 }
 
 
@@ -52,10 +52,6 @@ div {
 .title {
 
 }
-.theme-dark {
-    /*--header-color:none;*/
-    --header-color: #4684ee;
-}
 
 .modal-content {
     background-color: #fefefe;
@@ -84,12 +80,15 @@ div {
 /*
     聊天框的样式
 */
+.chat-div {
+    border-radius: 5px;
+}
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 80%;
+    height: 90%;
     width: 100%;
-    max-width: 800px;
+    /*max-width: 800px;*/
     margin: 0 auto;
     padding: 20px;
     box-sizing: border-box;
@@ -99,8 +98,8 @@ div {
 
 .chat-messages {
     flex-grow: 1;
-    overflow-y: auto;
-
+    max-height: 90%; /* 指定最大高度 */
+    overflow-y: auto; /* 只在内容超过容器高度时显示垂直滚动条 */
 }
 
 .chat-message {
@@ -114,7 +113,7 @@ div {
     float: left;
     background-color: #dcdcdc;
     color: #333;
-    max-width: 80%;
+    max-width: 90%;
 }
 
 .user-message {
@@ -182,15 +181,14 @@ div {
     max-height: 80%;
     overflow: auto;
 }
-
-.close-button {
+.my-component-content .close-button {
     position: absolute;
     top: 10px;
     right: 10px;
-    padding: 5px 10px;
+    padding: 5px;
     border: none;
     border-radius: 5px;
-    background-color: #007bff;
+    /*background-color: #007bff;*/
     color: #fff;
     font-size: 16px;
     cursor: pointer;
@@ -233,4 +231,236 @@ div {
     .sidebar button {
         display: block;
         margin-bottom: 10px;
+    }
+
+
+/*下拉框样式*/
+/* 下拉框容器 */
+.dropdown-container {
+    position: relative; /* 相对定位 */
+    display: inline-block; /* 显示为行内块元素 */
+    max-width: 200px; /* 最大宽度为 200 像素 */
+}
+
+/* 下拉框按钮 */
+.dropdown-button {
+    display: flex; /* 使用 flexbox 布局 */
+    align-items: center; /* 垂直居中 */
+    justify-content: space-between; /* 水平对齐 */
+    padding: 10px; /* 内边距 */
+    border: none; /* 移除按钮边框 */
+    background-color: #333; /* 按钮背景色为暗灰色 */
+    color: #fff; /* 文字颜色为白色 */
+    cursor: pointer; /* 鼠标指针变成手指 */
+
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+}
+
+/* 下拉框菜单 */
+.dropdown-menu {
+    position: absolute; /* 绝对定位 */
+    top: 100%; /* 位于按钮下方 */
+    left: 0; /* 左对齐 */
+    z-index: 1; /* 确保菜单在顶部 */
+    min-width: 200px; /* 最小宽度 */
+    padding: 10px; /* 内边距 */
+    background-color: #fff; /* 背景色为白色 */
+    border: 1px solid #ccc; /* 边框 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 阴影效果 */
+    max-height: 200px; /* 最大高度为 200 像素 */
+    overflow-y: auto; /* 垂直方向自动滚动 */
+    background-color: #333; /* 菜单背景色为暗灰色 */
+    color: #fff; /* 文字颜色为白色 */
+    border: 1px solid #fff; /* 边框为白色 */
+}
+
+/* 下拉框组 */
+.dropdown-group {
+    margin-bottom: 10px; /* 组之间的间距 */
+}
+
+/* 下拉框组标题 */
+.dropdown-group-header {
+    font-weight: bold; /* 加粗文本 */
+    margin-bottom: 5px; /* 标题和选项之间的间距 */
+}
+
+/* 下拉框选项 */
+.dropdown-option {
+    padding: 5px; /* 内边距 */
+    cursor: pointer; /* 鼠标指针变成手指 */
+    background-color: #444; /* 选项背景色为更暗的灰色 */
+    color: #fff; /* 文字颜色为白色 */
+}
+
+    /* 下拉框选项悬停效果 */
+    .dropdown-option:hover {
+        background-color: #555; /* 悬停时背景色变为更亮的灰色 */
+    }
+.editor-head {
+    background-color: #333;
+    color: #f2f2f2;
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+/*标题栏的样式*/
+.editor-head button {
+    align-items: center; /* 垂直居中 */
+    justify-content: space-between; /* 水平对齐 */
+    padding: 10px; /* 内边距 */
+    border: none; /* 移除按钮边框 */
+    background-color: #333; /* 按钮背景色为暗灰色 */
+    color: #fff; /* 文字颜色为白色 */
+    cursor: pointer; /* 鼠标指针变成手指 */
+}
+
+    .editor-head button:hover {
+        background-color: #444; /* 悬停时背景色变为更亮的灰色 */
+    }
+
+    .editor-head button:focus {
+        outline: none; /* 移除按钮获得焦点时的边框 */
+        /*box-shadow: 0 0 0 2px #fff, 0 0 0 4px #007bff;*/ /* 添加获得焦点时的阴影效果 */
+        /*background: linear-gradient(to bottom, #ccc, #aaa);*/ /* 渐变色更暗 */
+        /*background-color: #0062cc;*/ /* 获得焦点时按钮背景色变为深蓝色 */
+    }
+
+
+/*主页样式*/
+.container {
+    background-color: black;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.title-bar {
+    background-color: #333;
+    /*padding: 10px;*/
+    display: flex;
+    /*justify-content: flex-end;*/
+}
+
+    .title-bar button {
+        margin-left: 10px;
+    }
+
+.split-container {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.left-pane,
+.right-pane {
+    flex: 1;
+    height: 100%;
+    min-width: 0;
+    overflow: auto;
+}
+
+.left-pane {
+    background-color: #222;
+}
+
+.right-pane {
+    background-color: #444;
+}
+
+.bottom-nav {
+    background-color: #333;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+    .bottom-nav a {
+        margin: 0 10px;
+        color: white;
+        text-decoration: none;
+    }
+
+/*弹窗*/
+/* 弹窗背景色 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* 弹窗主体部分 */
+.modal-dialog {
+    position: relative;
+    margin: 100px auto;
+    width: 80%;
+    max-width: 600px;
+    background-color: #333;
+    color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #000;
+}
+
+/* 弹窗头部 */
+.modal-header {
+    padding: 15px;
+    border-bottom: 1px solid #444;
+}
+
+/* 弹窗标题 */
+.modal-title {
+    margin-top: 0;
+}
+
+/* 关闭按钮 */
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* 弹窗内容 */
+.modal-body {
+    padding: 15px;
+    text-align: center;
+}
+
+.chat-input textarea {
+    resize: none;
+    overflow: hidden;
+    height: 3em;
+}
+
+.chat-input {
+    box-sizing: border-box;
+    display: flex;
+}
+
+    .chat-input textarea {
+        flex: 1;
+        margin-right: 8px;
+        box-sizing: border-box;
+        resize: none;
+        overflow: hidden;
+        height: 3em;
+        position:inherit;
+    }
+
+    .chat-input .send-button {
+        box-sizing: border-box;
     }

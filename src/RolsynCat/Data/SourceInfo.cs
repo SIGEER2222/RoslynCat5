@@ -3,10 +3,8 @@ using RoslynCat.Interface;
 
 namespace RoslynCat.Data
 {
-
     public class SourceInfo : IRequest
     {
-
         public SourceInfo()
         {
         }

@@ -13,7 +13,6 @@ namespace RoslynCat.Pages
     public partial class Index
     {
         public List<Diagnostic> Diagnostics { get; set; }
-        [Inject] Compiler CompliterService { get; set; }
         [Inject] IGistService GistService { get; set; }
         [Inject] IJSRuntime JS { get; set; }
         [Inject] IWorkSpaceService WorkSpaceService { get; set; }
@@ -21,11 +20,9 @@ namespace RoslynCat.Pages
         [Parameter] public string gistId { get; set; }
 
         private string shareId = string.Empty;
-        Uri uri;
         string baseUri;
 
         protected override async void OnInitialized() {
-            uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
             baseUri = NavigationManager.BaseUri;
         }
 
@@ -41,7 +38,7 @@ namespace RoslynCat.Pages
                 Result = "等待编译……";
                 await JsRuntimeExt.Shared.CreateMonacoEditorAsync(editorId,code);
                 await JsRuntimeExt.Shared.CreateMonacoEditorAsync(resultId,Result);
-                CompliterService.CreatCompilation(code);
+                CompletionProvider.RunCode(code);
                 await JsRuntimeExt.Shared.InvokeVoidAsync("monacoInterop.registerMonacoProviders",DotNetObjectReference.Create(this));
             }
         }
@@ -78,26 +75,18 @@ namespace RoslynCat.Pages
 
         protected async Task Test() {
             code = await JsRuntimeExt.Shared.GetValue(editorId);
-            Result = CompliterService.CompileAndRun(code);
+            //Result = CompliterService.CompileAndRun(code);
+            Result = await CompletionProvider.RunCode(code);
             await JsRuntimeExt.Shared.SetValue(resultId,Result);
             await Console.Out.WriteLineAsync(Result);
         }
 
-        protected async Task AskGPT() {
-            string ask =  await JsRuntimeExt.Shared.GetValue(editorId);
-            Result = "思考中……请等待";
-            askGpt = "正在思考，请勿重复点击";
-            StateHasChanged();
-            await JsRuntimeExt.Shared.SetValue(resultId,Result);
-            Result = await new ChatGPT().Reply(ask);
-            await JsRuntimeExt.Shared.SetValue(resultId,Result);
-            askGpt = "问问ChatGPT?";
-        }
+       
         protected async Task CodeSharing() {
             code = await JsRuntimeExt.Shared.GetValue(editorId);
             if (string.IsNullOrEmpty(code)) return;
             await GistService.CreateGistAsync(code);
-            shareId = $" {baseUri}codeshare/{GistService.GistId}";
+            shareId = $"{baseUri}codeshare/{GistService.GistId}";
             await JsRuntimeExt.Shared.CopyUrl(shareId);
         }
 
@@ -110,6 +99,17 @@ namespace RoslynCat.Pages
             InvokeAsync(() => { this.StateHasChanged(); });
             //_ = JS.SetMonacoDiagnosticsAsync(_editorId, diagnostics);
         }
+
+        //protected async Task AskGPT() {
+        //    string ask =  await JsRuntimeExt.Shared.GetValue(editorId);
+        //    Result = "思考中……请等待";
+        //    askGpt = "正在思考，请勿重复点击";
+        //    StateHasChanged();
+        //    await JsRuntimeExt.Shared.SetValue(resultId,Result);
+        //    Result = await new ChatGPT().Reply(ask);
+        //    await JsRuntimeExt.Shared.SetValue(resultId,Result);
+        //    askGpt = "问问ChatGPT?";
+        //}
     }
 
 }

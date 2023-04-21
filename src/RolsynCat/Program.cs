@@ -28,6 +28,7 @@ builder.Services.AddTransient<IGistService,CodeSharing>();
 builder.Services.AddTransient<CompletionProvider>();
 
 var app = builder.Build();
+app.UsePathBase("/");
 
 if (!app.Environment.IsDevelopment()) {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
@@ -42,8 +43,8 @@ if (app.Environment.IsDevelopment()) {
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
-
 app.UseRouting();
+
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

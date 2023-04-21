@@ -1,70 +1,68 @@
 ﻿@page "/chat"
 @using Markdig
+@using RoslynCat.Controllers;
 
-<div class="chat-container">
-    <div class="chat-messages">
-        @foreach (var message in Messages) {
-            <div class="chat-message @(message.IsSystemMessage ? "system-message" : "user-message")">
-                <div class="message-bubble">
-                    @if (message.IsSystemMessage) {
+<div class="chat-div">
+    <div class="chat-container">
+        <div class="chat-messages">
+            @foreach (var message in Messages) {
+                <div class="chat-message @(message.IsSystemMessage ? "system-message" : "user-message")">
+                    <div class="message-bubble">
+                        @if (message.IsSystemMessage) {
 
-                        <div>@((MarkupString)htmlText)</div>
-                    }
-                    else {
-                        <p>@message.Text</p>
-                    }
+                            <div>@((MarkupString)message.Text)</div>
+                        }
+                        else {
+                            <p>@message.Text</p>
+                        }
+                    </div>
                 </div>
-            </div>
-        }
-    </div>
-    <div class="chat-input">
-        <input type="text" @bind="@CurrentMessage" placeholder="Type your message here...">
-        <button class="send-button" @onclick="SendMessage">Send</button>
+            }
+        </div>
+        <div class="chat-input">
+            <textarea @bind="@CurrentMessage" placeholder="@placeholder" disabled="@isSending"></textarea>
+            <button class="send-button" @onclick="SendMessage" disabled="@isSending">发送</button>
+        </div>
     </div>
 </div>
 
 @code {
-    private List<Message> Messages = new List<Message>();
-    private string CurrentMessage;
 
+    private bool isSending = false;
+    private string CurrentMessage = string.Empty;
+    private string placeholder = "请输入问题";
+    private List<Message> Messages = new List<Message>();
+    private Dialogue lastMessage = new Dialogue();
     private class Message
     {
         public string Text { get; set; }
         public bool IsSystemMessage { get; set; }
-
     }
 
-    private void SendMessage() {
+    private async Task SendMessage() {
         if (!string.IsNullOrWhiteSpace(CurrentMessage)) {
-            UpdateHtmlText();
-            Messages.Add(new Message { Text = CurrentMessage,IsSystemMessage = false });
-            Messages.Add(new Message { Text = CurrentMessage,IsSystemMessage = true });
-            Messages.Add(new Message { Text = htmlText,IsSystemMessage = true });
+            string ask = CurrentMessage;
             CurrentMessage = "";
+            await WaitMessage(ask);
         }
     }
 
-    private string htmlText = "";
-    private string markdownText =$@"# 这是一个标题
+    private async Task WaitMessage(string ask) {
+        isSending = true;
+        placeholder = "思考中，请等待……";
+        string result = await new ChatGPT().Reply(ask,lastMessage);
+        Console.WriteLine(result);
+        result = UpdateHtmlText(result);
+        Messages.Add(new Message { Text = ask,IsSystemMessage = false });
+        Messages.Add(new Message { Text = result,IsSystemMessage = true });
+        lastMessage.ask = CurrentMessage;
+        lastMessage.message = result;
+        isSending = false;
+        placeholder = "请输入问题";
+    }
 
-这是一段普通文本。
-
-## 这是一个二级标题  ## 这是一个二级标题  ## 这是一个二级标题  ## 这是一个二级标题
-
-- 这是一个无序列表项
-- 这是另一个无序列表项
-
-1. 这是一个有序列表项
-2. 这是另一个有序列表项
-
-[这是一个链接](https://www.example.com)
-
-**这是粗体文本**
-
-*这是斜体文本*";
-
-    private void UpdateHtmlText() {
+    private string UpdateHtmlText(string text) {
         var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-        htmlText = Markdown.ToHtml(markdownText,pipeline);
+        return Markdown.ToHtml(text,pipeline);
     }
 }
