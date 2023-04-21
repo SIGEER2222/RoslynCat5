@@ -2,7 +2,6 @@
 ## 如何运行？
 git clone https://github.com/SIGEER2222/RoslynCat.git 
 
-cd \RoslynCat\src\RolsynCat
 dotnet run
 
 ## 注意：
