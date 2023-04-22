@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.JSInterop;
@@ -15,7 +16,6 @@ namespace RoslynCat.Pages
         public List<Diagnostic> Diagnostics { get; set; }
         [Inject] IGistService GistService { get; set; }
         [Inject] IJSRuntime JS { get; set; }
-        [Inject] IWorkSpaceService WorkSpaceService { get; set; }
         [Inject] Roslyn.CompletionProvider CompletionProvider { get; set; }
         [Parameter] public string gistId { get; set; }
 
@@ -68,17 +68,16 @@ namespace RoslynCat.Pages
         protected async Task<IResponse> Provider(string code,int position,RequestType request) {
             SourceInfo sourceInfo = new SourceInfo(code,string.Empty,position);
             sourceInfo.Type = request;
-            await CompletionProvider.CreateProviderAsync(WorkSpaceService,sourceInfo);
+            await CompletionProvider.CreateProviderAsync(sourceInfo);
             IResponse respone = await CompletionProvider.GetResultAsync();
             return respone;
         }
 
-        protected async Task Test() {
+        protected async Task RunCode() {
+            string inputValue = GetConsoleValue()??string.Empty;
             code = await JsRuntimeExt.Shared.GetValue(editorId);
-            //Result = CompliterService.CompileAndRun(code);
-            Result = await CompletionProvider.RunCode(code);
+            Result = await CompletionProvider.RunCode(code,inputValue);
             await JsRuntimeExt.Shared.SetValue(resultId,Result);
-            await Console.Out.WriteLineAsync(Result);
         }
 
        
@@ -88,6 +87,7 @@ namespace RoslynCat.Pages
             await GistService.CreateGistAsync(code);
             shareId = $"{baseUri}codeshare/{GistService.GistId}";
             await JsRuntimeExt.Shared.CopyUrl(shareId);
+            show = true;
         }
 
         private void OnMyParameterChanged() {

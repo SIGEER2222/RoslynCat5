@@ -48,26 +48,9 @@ monacoInterop.CSharpRegister = (elementId) => {
 //注册C#语言的语法提示、快捷键等
 monacoInterop.registerMonacoProviders = async (dotNetObject) => {
 
-    //TODO
-    console.log("ssssssssss")
-    //monaco.editor.onDidCreateModel(model => {
-    //    console.log("新模型已创建:", model.uri.toString());
-    //    model.onDidChangeContent(() => {
-    //    let handle = null;
-    //        console.log("创建了模型")
-    //        //清除错误信息
-    //        monaco.editor.setModelMarkers(model, 'csharp', []);
-    //        //清除等待
-    //        clearTimeout(handle);
-    //        handle = setTimeout(() => getModelMarkers(model), 500);
-    //    });
-    //    module.validate();
-    //})
-
-
-    //
+    //注册自动完成提供程序
     async function getProvidersAsync(code, position) {
-        let suggestions = [];
+        let suggestions = module.suggestionsTab;
         await dotNetObject.invokeMethodAsync('ProvideCompletionItems', code, position).then(result => {
             let r = JSON.parse(result);
             for (let key in r) {
@@ -81,24 +64,10 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
                 });
             }
         });
-        return suggestionsTab.concat(suggestions);
+        //return suggestionsTab.concat(suggestions);
+        return suggestions;
     }
 
-    let suggestionsTab = [];
-
-    //定义常用快捷补全
-    suggestionsTab.push({
-        label: {
-            label: 'cw',
-            description: '快捷键Console.WriteLine();'
-        },
-        insertText: 'Console.WriteLine()'
-    })
-
-    //预加载
-    suggestionsTab = await getProvidersAsync(sourceCode, 100);
-
-    //注册自动完成提供程序
     monaco.languages.registerCompletionItemProvider(languageId, {
         triggerCharacters: ['.', ' ', ','],
         provideCompletionItems: async (model, position) => {
@@ -206,16 +175,25 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
 
 
     //添加快捷键
-    monacoInterop.editors['editorId'].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+    let editor = monacoInterop.editors['editorId'];
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
         localStorage.setItem('oldCode', monacoInterop.editors['editorId'].getValue());
     });
-    monacoInterop.editors['editorId'].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
         dotNetObject.invokeMethodAsync('FormatCode', monacoInterop.editors['editorId'].getValue())
             .then(formatCode => { monacoInterop.editors['editorId'].setValue(formatCode); });
     });
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyD, () => {
+        let lineNumber = editor.getPosition().lineNumber;
+        let lineText = editor.getModel().getLineContent(lineNumber);
+        editor.getModel().applyEdits([
+            { range: new monaco.Range(lineNumber, 1, lineNumber, 1), text: lineText + '\n' }
+        ]);
+        editor.setPosition(new monaco.Position(lineNumber + 1, lineText.length + 1));
+    });
 
     //添加右键
-    monacoInterop.editors['editorId'].addAction({
+    editor.addAction({
         id: "formatCode",
         label: "格式化代码 ctrl + k",
         contextMenuOrder: 0,
@@ -225,7 +203,7 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
                 .then(formatCode => { editor.setValue(formatCode); });
         }
     });
-    monacoInterop.editors['editorId'].addAction({
+    editor.addAction({
         id: "clear",
         label: "清除",
         contextMenuOrder: 1,
@@ -305,41 +283,14 @@ monacoInterop.getCode = (elementId) => monacoInterop.editors[elementId].getValue
 
 monacoInterop.setCode = (elementId, code) => monacoInterop.editors[elementId].setValue(code);
 
-monacoInterop.setMarkers = (elementId, markers) => {
-    const editor = monacoInterop.editors[elementId];
-    const model = editor.getModel();
-    monaco.editor.setModelMarkers(model, null, markers);
-};
-
 //快速修复
 monacoInterop.quickFix = () => {
     monaco.languages.registerCodeActionProvider
 }
 
-
 //代码分享
-monacoInterop.copyText = (text) => {
-    var modal = document.getElementById("myModal");
-    var span = document.getElementsByClassName("close")[0];
-
-    console.log(text)
-    navigator.clipboard.writeText(text)
-        .then(() => {
-            modal.style.display = "block";
-        })
-        .catch(err => {
-            alert('Failed to copy: ', err);
-        });
-
-    span.onclick = function () {
-        modal.style.display = "none";
-    }
-    window.onclick = function (event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-}
+monacoInterop.copyText = module.copyText;
+monacoInterop.messageBox = 
 window.monacoInterop = monacoInterop;
 
 console.log("end")

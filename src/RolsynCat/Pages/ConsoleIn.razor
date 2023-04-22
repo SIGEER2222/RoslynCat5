@@ -1,0 +1,26 @@
+﻿@using Microsoft.AspNetCore.Components
+
+<div class="console-in-container">
+    <button @onclick="@ToggleTextArea">控制台输入</button>
+    <div class="textarea-container" style="display: @DisplayTextArea">
+        <textarea @bind="@InputValue"></textarea>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string InputValue { get; set; } 
+    private bool showTextArea = false;
+    private string DisplayTextArea => showTextArea ? "block" : "none";
+
+    [Parameter]
+    public EventCallback<string> OnValueChanged { get; set; }
+
+    private void ToggleTextArea() {
+        showTextArea = !showTextArea;
+    }
+
+    private async Task HandleValueChanged() {
+        await OnValueChanged.InvokeAsync(InputValue);
+    }
+}

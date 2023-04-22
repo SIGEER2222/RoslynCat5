@@ -5,7 +5,7 @@ using System.Data;
 using System.Xml;
 using System.Numerics;
 
-namespace RoslynCat.Roslyn
+namespace RoslynCat.Abandon
 {
     /// <summary>
     /// 创建工作区、添加dll引用
@@ -35,8 +35,9 @@ namespace RoslynCat.Roslyn
             MetadataReference.CreateFromFile(typeof(BigInteger).Assembly.Location),
         };
 
-       
-        public static CompletionWorkspace Create(List<string> usings) {
+
+        public static CompletionWorkspace Create(List<string> usings)
+        {
             Assembly[] lst = new[] {
                 Assembly.Load("Microsoft.CodeAnalysis.Workspaces"),
                 Assembly.Load("Microsoft.CodeAnalysis.CSharp.Workspaces"),
@@ -57,7 +58,7 @@ namespace RoslynCat.Roslyn
             workspace.AddProject(projectInfo);
             var project = workspace.CurrentSolution.GetProject(projectInfo.Id).WithMetadataReferences(references);
 
-            return new CompletionWorkspace() { _workspace = workspace,_project = project,_metadataReferences = references };
+            return new CompletionWorkspace() { _workspace = workspace, _project = project, _metadataReferences = references };
         }
 
         //public async Task<CompletionDocument> CreateDocument(string code) {

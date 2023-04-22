@@ -2,6 +2,7 @@
     height: 100%;
     width: 100%;
 }
+
 div {
     /*border-radius: 5px;*/
 }
@@ -50,7 +51,6 @@ div {
 }
 
 .title {
-
 }
 
 .modal-content {
@@ -83,6 +83,7 @@ div {
 .chat-div {
     border-radius: 5px;
 }
+
 .chat-container {
     display: flex;
     flex-direction: column;
@@ -142,7 +143,7 @@ div {
         border: 1px solid #ccc;
         border-radius: 5px;
         font-size: 16px;
-        color:black;
+        color: black;
     }
 
 .send-button {
@@ -181,18 +182,19 @@ div {
     max-height: 80%;
     overflow: auto;
 }
-.my-component-content .close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 5px;
-    border: none;
-    border-radius: 5px;
-    /*background-color: #007bff;*/
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-}
+
+    .my-component-content .close-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 5px;
+        border: none;
+        border-radius: 5px;
+        /*background-color: #007bff;*/
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+    }
 
 
 /*侧边栏*/
@@ -300,6 +302,7 @@ div {
     .dropdown-option:hover {
         background-color: #555; /* 悬停时背景色变为更亮的灰色 */
     }
+
 .editor-head {
     background-color: #333;
     color: #f2f2f2;
@@ -310,27 +313,27 @@ div {
     padding: 0 20px;
 }
 
-/*标题栏的样式*/
-.editor-head button {
-    align-items: center; /* 垂直居中 */
-    justify-content: space-between; /* 水平对齐 */
-    padding: 10px; /* 内边距 */
-    border: none; /* 移除按钮边框 */
-    background-color: #333; /* 按钮背景色为暗灰色 */
-    color: #fff; /* 文字颜色为白色 */
-    cursor: pointer; /* 鼠标指针变成手指 */
-}
-
-    .editor-head button:hover {
-        background-color: #444; /* 悬停时背景色变为更亮的灰色 */
+    /*标题栏的样式*/
+    .editor-head button {
+        align-items: center; /* 垂直居中 */
+        justify-content: space-between; /* 水平对齐 */
+        padding: 10px; /* 内边距 */
+        border: none; /* 移除按钮边框 */
+        background-color: #333; /* 按钮背景色为暗灰色 */
+        color: #fff; /* 文字颜色为白色 */
+        cursor: pointer; /* 鼠标指针变成手指 */
     }
 
-    .editor-head button:focus {
-        outline: none; /* 移除按钮获得焦点时的边框 */
-        /*box-shadow: 0 0 0 2px #fff, 0 0 0 4px #007bff;*/ /* 添加获得焦点时的阴影效果 */
-        /*background: linear-gradient(to bottom, #ccc, #aaa);*/ /* 渐变色更暗 */
-        /*background-color: #0062cc;*/ /* 获得焦点时按钮背景色变为深蓝色 */
-    }
+        .editor-head button:hover {
+            background-color: #444; /* 悬停时背景色变为更亮的灰色 */
+        }
+
+        .editor-head button:focus {
+            outline: none; /* 移除按钮获得焦点时的边框 */
+            /*box-shadow: 0 0 0 2px #fff, 0 0 0 4px #007bff;*/ /* 添加获得焦点时的阴影效果 */
+            /*background: linear-gradient(to bottom, #ccc, #aaa);*/ /* 渐变色更暗 */
+            /*background-color: #0062cc;*/ /* 获得焦点时按钮背景色变为深蓝色 */
+        }
 
 
 /*主页样式*/
@@ -458,9 +461,77 @@ div {
         resize: none;
         overflow: hidden;
         height: 3em;
-        position:inherit;
+        position: inherit;
     }
 
     .chat-input .send-button {
         box-sizing: border-box;
     }
+
+
+/*输入框*/
+.console-in-container {
+    position: relative;
+    display: flex;
+    /*flex-direction: row;
+    align-items: center;
+    justify-content: center;*/
+    margin: 20px;
+}
+
+.textarea-container {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    transform: translate(0, 100%);
+    z-index :1;
+}
+
+    .textarea-container textarea {
+        width: 300px;
+        height: 100px;
+        resize: none;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+
+
+/*消息框*/
+.message-box {
+    /*display: none;*/
+    position: fixed;
+    top: 50%;
+    right: 20%;
+    transform: translate(0, -50%);
+    background-color: #000;
+    color: #fff; /* 添加字体颜色属性 */
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: auto; /* 将宽度设置为自适应 */
+    z-index: 9999;
+}
+
+.message-box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.message-box-title {
+    margin: 0;
+}
+
+.message-box-close {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 0;
+}
+
+.message-box-content {
+    margin-top: 10px;
+}

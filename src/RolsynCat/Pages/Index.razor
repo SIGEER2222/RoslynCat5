@@ -4,19 +4,20 @@
 @using RoslynCat.Data
 @inject NavigationManager NavigationManager
 
-
 <div class="container">
     <div class="title-bar">
         <div class="editor-head">
-            <button @onclick="Test">运行</button>
+            <button @onclick="RunCode">运行</button>
             <button @onclick="CodeSharing">分享代码</button>
             <button @onclick="ShowMyComponent">问问GPT？</button>
+
+            <ConsoleIn @ref="consoleIn"/>
 
             @if (IsMyComponentVisible) {
                 <div class="my-component-modal">
                     <div class="my-component-content">
                         <button class="close-button" @onclick="HideMyComponent">关闭</button>
-                        <Chat/> 
+                        <Chat />
                     </div>
                 </div>
             }
@@ -24,6 +25,8 @@
             <a class="" href="https://github.com/SIGEER2222/RoslynCat">RolsynCat in Github</a>
         </div>
     </div>
+
+    @*编辑器主体*@
     <div class="split-container">
         <div class="left-pane resizable">
             <div id="@editorId" class="monaco"></div>
@@ -34,23 +37,19 @@
             </div>
         </div>
     </div>
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <p>分享地址已复制到剪切板：@shareId</p>
-        </div>
-    </div>
+    <MessageBox Message ="@shareId" Show ="@show"></MessageBox>
+
 </div>
 
 @code {
     private static readonly string editorId = Data.Constants.csharpId;
     private static readonly string resultId = Data.Constants.resultId;
     private string code { get; set; } = Data.Constants.defultCode;
+    private string InputValue { get; set; } = "在此输入框输入内容";
     private string share { get; set; } = "分享代码";
-    private string @s { get; set; } = "开发中……";
-    private string askGpt = "问问ChatGPT?";
-
+    private ConsoleIn consoleIn;
     private string Result = "等待编译……";
+    private bool show = false;
 
     private bool IsMyComponentVisible = false;
 
@@ -61,4 +60,12 @@
     private void HideMyComponent() {
         IsMyComponentVisible = false;
     }
+
+    private void HandleValueChanged(string newValue) {
+        Console.WriteLine("newValue" + newValue);
+        InputValue = newValue;
+    }
+
+    private string GetConsoleValue() => consoleIn.InputValue;
+
 }

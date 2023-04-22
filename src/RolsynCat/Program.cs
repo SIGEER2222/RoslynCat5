@@ -12,7 +12,7 @@ builder.Services.AddOptions();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGenNewtonsoftSupport();
-builder.Services.AddTransient<Compiler>();
+//builder.Services.AddTransient<Compiler>();
 builder.Services.AddTransient<IWorkSpaceService,WorkSpaceService>();
 builder.Services.AddTransient<ICompleteProvider,CompleteProvider>();
 //builder.Services.AddScoped<ISignatureProvider,SignatureProvider>();

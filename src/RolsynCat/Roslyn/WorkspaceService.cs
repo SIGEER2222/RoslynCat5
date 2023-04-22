@@ -12,10 +12,11 @@ namespace RoslynCat.Roslyn
     public class WorkSpaceService : IWorkSpaceService
     {
         private readonly AdhocWorkspace _workspace;
-        private readonly Project _project;
-        private  Document _document;
+        private Project _project;
+        private Document _document;
 
         public Document Document { get => _document; }
+        public Project Project { get => _project; }
 
         public WorkSpaceService() {
             Assembly[] lst = new[] {
@@ -28,7 +29,7 @@ namespace RoslynCat.Roslyn
             var host = MefHostServices.Create(lst);
             _workspace = new AdhocWorkspace(host);
 
-            var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+            var options = new CSharpCompilationOptions(OutputKind.ConsoleApplication)
                                 .WithOverflowChecks(true)
                                 .WithOptimizationLevel(OptimizationLevel.Release)
                                 .WithUsings(new[] { "System" });
@@ -41,11 +42,8 @@ namespace RoslynCat.Roslyn
                                 compilationOptions: options);
 
             var references =  Constants.DefaultMetadataReferences;
-
             _project = _workspace.AddProject(projectInfo).AddMetadataReferences(references);
             _document = _project.AddDocument("RoslynCat.cs",SourceText.From(Constants.defultCode));
-
-            //_document = _workspace.AddDocument(_project.Id,"RoslynCat.cs",SourceText.From(Constants.defultCode));
         }
 
         /// <summary>
@@ -75,10 +73,9 @@ namespace RoslynCat.Roslyn
             if (string.IsNullOrWhiteSpace(newCode)) {
                 return;
             }
-            var newSolution = _document.Project.Solution.WithDocumentText(_document.Id, SourceText.From(newCode));
-            _workspace.TryApplyChanges(newSolution);
+            //var newSolution = _document.Project.Solution.WithDocumentText(_document.Id, SourceText.From(newCode));
+            //var i = _workspace.TryApplyChanges(newSolution);
             _document = _project.AddDocument("RoslynCat.cs",SourceText.From(newCode));
-            Console.WriteLine(_project.DocumentIds.Count());
         }
 
         //TODO

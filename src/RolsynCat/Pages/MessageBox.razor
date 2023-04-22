@@ -1,0 +1,23 @@
+﻿
+@page "/m"
+
+<div id="messageBox" class="message-box" style="@(show? "display:block;":"display:none;")">
+    <div class="message-box-header">
+        <h3 class="message-box-title">代码已分享</h3>
+        <button class="message-box-close" @onclick="HideMessageBox">X</button>
+    </div>
+    <div class="message-box-content">
+        <p>地址已复制到剪切板： @Message</p>
+    </div>
+</div>
+
+@code{
+    [Parameter]
+    public string Message { get; set; } = string.Empty;
+
+    [Parameter] 
+    public bool show { get; set; } = false;
+    private void HideMessageBox() {
+        show = false;
+    }
+}

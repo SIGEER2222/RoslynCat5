@@ -1,6 +1,41 @@
 
 let assemblies = null;
 
+
+
+export function showMessageBox() {
+    // 获取消息框元素
+    const messageBox = document.querySelector('#messageBox');
+    // 显示消息框
+    messageBox.style.display = 'block';
+    // 在 5 秒后自动关闭消息框
+    setTimeout(function () {
+        hideMessageBox();
+    }, 5000);
+
+    function hideMessageBox() {
+        // 隐藏消息框
+        messageBox.style.display = 'none';
+    }
+}
+
+/**
+ * 复制文本到剪贴板，并显示一个模态框。
+ *
+ * @param {string} text - 要复制的文本。
+ */
+export function copyText(text) {
+    // 将文本复制到剪贴板
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            console.log(text);
+        })
+        .catch(err => {
+            // 复制失败时弹出警告框
+            alert('Failed to copy: ', err);
+        });
+}
+
 async function sendRequest(type, request) {
     let endPoint;
     const headers = {
@@ -22,129 +57,6 @@ async function sendRequest(type, request) {
     console.log(response)
     return response.data;
 }
-
-export async function provideHover(model, position) {
-    let request = {
-        SourceCode: model.getValue(),
-        Position: model.getOffsetAt(position),
-        Assemblies: assemblies
-    }
-
-    let resultQ = await sendRequest("hover", request);
-    console.log(resultQ);
-    console.log(resultQ.data);
-    console.log("registerHoverProvider");
-    if (resultQ.data) {
-        posStart = model.getPositionAt(resultQ.data.OffsetFrom);
-        posEnd = model.getPositionAt(resultQ.data.OffsetTo);
-
-        return {
-            range: new monaco.Range(posStart.lineNumber, posStart.column, posEnd.lineNumber, posEnd.column),
-            contents: [
-                { value: resultQ.data.Information }
-            ]
-        };
-    }
-
-    return null;
-}
-export async function provideSignatureHelp(model, postion) {
-    let request = {
-        SourceCode: model.getValue(),
-        Position: model.getOffsetAt(position),
-        Assemblies: assemblies
-    }
-
-    let resultQ = await sendRequest("signature", request);
-    if (!resultQ.data) return;
-    console.log("sss");
-    console.log(resultQ);
-    let signatures = [];
-    for (let signature of resultQ.data.Signatures) {
-        let params = [];
-        for (let param of signature.Parameters) {
-            params.push({
-                label: param.Label,
-                documentation: param.Documentation ?? ""
-            });
-        }
-
-        signatures.push({
-            label: signature.Label,
-            documentation: signature.Documentation ?? "",
-            parameters: params,
-        });
-    }
-
-    let signatureHelp = {};
-    signatureHelp.signatures = signatures;
-    signatureHelp.activeParameter = resultQ.data.ActiveParameter;
-    signatureHelp.activeSignature = resultQ.data.ActiveSignature;
-
-    return {
-        value: signatureHelp,
-        dispose: () => { }
-    };
-}
-
-export async function provideCompletionItems(model, position) {
-    let suggestions = [];
-
-    let request = {
-        SourceCode: model.getValue(),
-        Position: model.getOffsetAt(position),
-        Assemblies: assemblies
-    }
-    console.log("provideCompletionItems")
-
-    let resultQ = await sendRequest("complete", request);
-
-    console.log(resultQ);
-    for (let elem of resultQ.data) {
-        suggestions.push({
-            label: {
-                label: elem.Suggestion,
-                description: elem.Description
-            },
-            kind: monaco.languages.CompletionItemKind.Function,
-            insertText: elem.Suggestion
-
-        });
-    }
-
-    return { suggestions: suggestions };
-}
-
-//提示信息
-export async function validate() {
-
-    let request = {
-        SourceCode: model.getValue(),
-        Assemblies: assemblies
-    }
-
-    let resultQ = await sendRequest("codeCheck", request)
-
-    let markers = [];
-
-    for (let elem of resultQ.data) {
-        posStart = model.getPositionAt(elem.OffsetFrom);
-        posEnd = model.getPositionAt(elem.OffsetTo);
-        markers.push({
-            severity: elem.Severity,
-            startLineNumber: posStart.lineNumber,
-            startColumn: posStart.column,
-            endLineNumber: posEnd.lineNumber,
-            endColumn: posEnd.column,
-            message: elem.Message,
-            code: elem.Id
-        });
-    }
-    console.log(markers);
-    console.log("onDidCreateModel");
-    monaco.editor.setModelMarkers(model, 'csharp', markers);
-}
-
 export const languageId = 'csharp';
 
 /**
@@ -523,24 +435,6 @@ export function registerDocumentSemanticTokensProvider() {
     let cache = new Map();
 }
 
-export async function getProvidersAsync(code, position, dotNetObject) {
-    let suggestions = [];
-    await dotNetObject.invokeMethodAsync('ProvideCompletionItems2', code, position).then(result => {
-        let r = JSON.parse(result);
-        for (let key in r) {
-            suggestions.push({
-                label: {
-                    label: key,
-                    description: r[key]
-                },
-                kind: monaco.languages.CompletionItemKind.Function,
-                insertText: key
-            });
-        }
-    });
-    return suggestionsTab.concat(suggestions);
-}
-
 export function createEditor(elementId, value) {
     let editor = monaco.editor.create(document.getElementById(elementId), {
         value: value,
@@ -567,52 +461,96 @@ export function createEditor(elementId, value) {
     return editor;
 }
 
-//弹窗
-function createPopup() {
-    const popup = document.createElement('div');
-    popup.style.position = 'fixed';
-    popup.style.top = '5%'; // 垂直方向上占据页面 90%
-    popup.style.left = '5%';
-    popup.style.width = '90%'; // 水平方向上占据页面 90%
-    popup.style.height = '90%';
-    popup.style.backgroundColor = '#fff'; // 不透明白色背景
 
-    const frame = document.createElement('iframe');
-    frame.style.width = '100%';
-    frame.style.height = '100%';
-    frame.src = 'https://juejin.cn/post/6984683777343619102';
-    frame.setAttribute('tabindex', '0'); // 将 iframe 设为可聚焦元素
-    popup.appendChild(frame);
-
-    const closeButton = document.createElement('button');
-    closeButton.style.position = 'absolute';
-    closeButton.style.top = '10px';
-    closeButton.style.right = '10px';
-    closeButton.style.color = '#000';
-    closeButton.style.fontSize = '20px';
-    closeButton.innerText = '关闭';
-    closeButton.addEventListener('click', () => {
-        document.body.removeChild(popup);
-    });
-    popup.appendChild(closeButton);
-
-    document.body.appendChild(popup);
-
-    // 将焦点定向到 iframe 中
-    frame.focus();
-
-    // 绑定按键事件，按 ESC 关闭弹窗
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-            document.body.removeChild(popup);
-        }
-    });
-
-    // 绑定事件，当弹窗内的元素失去焦点时，将焦点重新定向到 iframe 中
-    const elements = popup.querySelectorAll('*');
-    elements.forEach((element) => {
-        element.addEventListener('blur', () => {
-            frame.focus();
-        });
-    });
-}
+/**
+ * 提供用于代码自动补全的建议项数组
+ *
+ * @typedef {Object} CompletionLabel
+ * @property {string} label - 建议项的显示文本
+ * @property {string} description - 建议项的描述
+ *
+ * @typedef {Object} CompletionItem
+ * @property {CompletionLabel} label - 建议项的标签
+ * @property {monaco.languages.CompletionItemKind} kind - 建议项的种类
+ * @property {monaco.languages.CompletionItemInsertTextRule} insertTextRules - 建议项的插入文本规则
+ * @property {string} insertText - 建议项的插入文本
+ * @property {string} sortText - 建议项的排序文本
+ *
+ * @type {CompletionItem[]} 建议项数组
+ */
+export const suggestionsTab = [
+    {
+        label: {
+            label: 'cw',
+            description: '快捷键Console.WriteLine();',
+        },
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        insertText: 'Console.WriteLine(${1:msg});',
+        sortText: '0',
+    },
+    {
+        label: {
+            label: 'for',
+            description: 'for 循环',
+        },
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        insertText: 'for (int i = 0; i < ${1:length}; i++)\n{\n\t${2://code...}\n}',
+    },
+    {
+        label: {
+            label: 'prop',
+            description: '自动属性',
+        },
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        sortText: '0',
+        insertText: 'public ${1:type} ${2:PropertyName} { get; set; }',
+    },
+    {
+        label: {
+            label: 'while',
+            description: 'while 循环',
+        },
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        sortText: '0',
+        insertText: 'while (${1:condition})\n{\n\t${2://code...}\n}',
+    },
+    {
+        label: {
+            label: 'try',
+            description: 'try-catch 块',
+        },
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        sortText: '0',
+        insertText:
+            'try\n{\n\t${1://code...}\n}\ncatch (${2:Exception} ex)\n{\n\t${3://handling code...}\n}',
+    },
+    {
+        label: {
+            label: 'foreach',
+            description: 'foreach 循环',
+        },
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        sortText: '0',
+        insertText:
+            'foreach (${1:type} ${2:item} in ${3:collection})\n{\n\t${4://code...}\n\t${5:Console.WriteLine(${2});}\n}',
+    },
+    {
+        label: {
+            label: 'if',
+            description: 'if 语句',
+        },
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        sortText: '0',
+        insertText: 'if (${1:condition}) {\n\t${2://code...}\n}$0',
+    },
+    {
+        label: {
+            label: 'else',
+            description: 'else 语句',
+        },
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        sortText: '0',
+        insertText: 'else {\n\t${1://code...}\n}$0',
+    },
+];
