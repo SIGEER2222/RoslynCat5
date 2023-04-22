@@ -38,7 +38,7 @@ namespace RoslynCat.Pages
                 Result = "µÈ´ý±àÒë¡­¡­";
                 await JsRuntimeExt.Shared.CreateMonacoEditorAsync(editorId,code);
                 await JsRuntimeExt.Shared.CreateMonacoEditorAsync(resultId,Result);
-                CompletionProvider.RunCode(code);
+                RunCode();
                 await JsRuntimeExt.Shared.InvokeVoidAsync("monacoInterop.registerMonacoProviders",DotNetObjectReference.Create(this));
             }
         }
