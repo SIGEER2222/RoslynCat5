@@ -33,4 +33,12 @@
 	  <Folder Include="新文件夹\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <EditorConfigFiles Remove="G:\Code\NewCode\RoslynCat\src\RolsynCat\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="G:\Code\NewCode\RoslynCat\src\RolsynCat\.editorconfig" />
+	</ItemGroup>
+
 </Project>

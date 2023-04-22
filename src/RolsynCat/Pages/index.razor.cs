@@ -65,6 +65,12 @@ namespace RoslynCat.Pages
             return JsonSerializer.Serialize(result.codeChecks);
         }
 
+        [JSInvokable("AutoRunCode")]
+        public async Task<string> AutoRunCode(string code) {
+            string inputValue = GetConsoleValue()??string.Empty;
+            return await CompletionProvider.RunCode(code,inputValue);
+        }
+
         protected async Task<IResponse> Provider(string code,int position,RequestType request) {
             SourceInfo sourceInfo = new SourceInfo(code,string.Empty,position);
             sourceInfo.Type = request;

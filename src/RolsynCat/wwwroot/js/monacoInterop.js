@@ -35,6 +35,7 @@ monacoInterop.createEditor = (elementId, code) => {
     } else if (elementId = 'resultId') {
         editor = module.createEditor(elementId, code);
     }
+    window.editor2 = editor;
     monacoInterop.editors[elementId] = editor;
 }
 
@@ -139,10 +140,54 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
 
     //添加快捷键
     let editor = monacoInterop.editors['editorId'];
-    module.addCommand(editor);
+
+    // 添加 Ctrl/Cmd + S 快捷键命令，保存代码到本地存储
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+        localStorage.setItem('oldCode', monacoInterop.editors['editorId'].getValue());
+    });
+
+    // 添加 Ctrl/Cmd + K 快捷键命令，使用 .NET 方法格式化代码
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
+        dotNetObject.invokeMethodAsync('FormatCode', monacoInterop.editors['editorId'].getValue())
+            .then(formatCode => { monacoInterop.editors['editorId'].setValue(formatCode); });
+    });
+    editor.addCommand(monaco.KeyCode.F2, () => {
+        console.log(111);
+    });
+
+    // 添加 Ctrl/Cmd + D 快捷键命令，复制当前行并插入新行
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyD, () => {
+        let lineNumber = editor.getPosition().lineNumber;
+        let lineText = editor.getModel().getLineContent(lineNumber);
+        editor.getModel().applyEdits([
+            { range: new monaco.Range(lineNumber, 1, lineNumber, 1), text: lineText + '\n' }
+        ]);
+        editor.setPosition(new monaco.Position(lineNumber + 1, lineText.length + 1));
+    });
 
     //添加右键
     module.addAction(editor);
+    let isChecked = false;
+
+    let myAction = editor.addAction({
+        id: 'checkRun',
+        label: '切换成自动运行',
+        contextMenuOrder: 0,
+        contextMenuGroupId: "code",
+        run: async function (editor) {
+            editor.onDidChangeModelContent(async (event) => {
+                const position = editor.getPosition();
+                const range = new monaco.Range(position.lineNumber, position.column - 1, position.lineNumber, position.column);
+                const text = editor.getModel().getValueInRange(range);
+                if (text.slice(-1) === ';') {
+                    console.log(text);
+                    const result = await dotNetObject.invokeMethodAsync("AutoRunCode", editor.getValue());
+                    console.log("result" + result);
+                    monacoInterop.editors["resultId"].setValue(result);
+                }
+            });
+        }
+    });
 }
 
 
