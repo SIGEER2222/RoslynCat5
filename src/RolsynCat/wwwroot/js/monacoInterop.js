@@ -3,8 +3,8 @@ import * as module from "./module.js";
 
 let languageId = "csharp";
 let monacoInterop = {};
-
 monacoInterop.editors = {};
+let csharpEditor = {};
 let defaultCode =
     [
         `using System;
@@ -29,46 +29,37 @@ monacoInterop.createEditor = (elementId, code) => {
             sourceCode = code;
         }
         editor = module.createEditor(elementId, sourceCode);
+        csharpEditor = editor;
+        window.csharpEditor = editor;
+
         monacoInterop.setMonarchTokensProvider();
         monacoInterop.setLanguageConfiguration();
         monacoInterop.CSharpRegister();
     } else if (elementId = 'resultId') {
         editor = module.createEditor(elementId, code);
     }
-    window.editor2 = editor;
     monacoInterop.editors[elementId] = editor;
 }
 
 
 monacoInterop.CSharpRegister = (elementId) => {
     let languageId = "csharp";
+    let autoRun = false;
+    //TODO
+    monaco.languages.registerSignatureHelpProvider(languageId, {
+        signatureHelpTriggerCharacters: ["("],
+        signatureHelpRetriggerCharacters: [","],
+        provideSignatureHelp: (model, position, token, context) => {
+        }
+    });
 }
 
 //注册C#语言的语法提示、快捷键等
 monacoInterop.registerMonacoProviders = async (dotNetObject) => {
 
-    module.handleMouseMove();
+    let autoRun = false;
 
-    //注册自动完成提供程序
-    async function getProvidersAsync(code, position) {
-        let suggestions = [];
-        await dotNetObject.invokeMethodAsync('ProvideCompletionItems', code, position).then(result => {
-            let res = JSON.parse(result);
-            suggestions = module.suggestionsTab.slice();
-            for (let key in res) {
-                suggestions.push({
-                    label: {
-                        label: key,
-                        description: res[key]
-                    },
-                    kind: monaco.languages.CompletionItemKind.Function,
-                    insertText: key
-                });
-            }
-        });
-        return suggestions;
-    }
-
+    // 注册自动完成提供程序
     monaco.languages.registerCompletionItemProvider(languageId, {
         triggerCharacters: ['.', ' ', ','],
         provideCompletionItems: async (model, position) => {
@@ -82,33 +73,35 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
         provideHover: async function (model, position) {
             const code = model.getValue();
             const cursor = model.getOffsetAt(position);
-
-            const result = await dotNetObject.invokeMethodAsync('HoverInfoProvide', code, cursor);
-            const r = JSON.parse(result);
-            console.log(r)
-            if (r) {
-                let posStart = model.getPositionAt(r.OffsetFrom);
-                let posEnd = model.getPositionAt(r.OffsetTo);
-
+            const data = await dotNetObject.invokeMethodAsync('HoverInfoProvide', code, cursor);
+            const result = JSON.parse(data);
+            if (result) {
+                const posStart = model.getPositionAt(result.OffsetFrom);
+                const posEnd = model.getPositionAt(result.OffsetTo);
+                const range = new monaco.Range(posStart.lineNumber, posStart.column, posEnd.lineNumber, posEnd.column);
                 return {
-                    range: new monaco.Range(posStart.lineNumber, posStart.column, posEnd.lineNumber, posEnd.column),
+                    range: range,
                     contents: [
-                        { value: r.Information }
+                        { value: result.Information }
                     ]
                 };
             }
         }
     });
 
-    //TODO
-    monaco.languages.registerSignatureHelpProvider(languageId, {
-        signatureHelpTriggerCharacters: ["("],
-        signatureHelpRetriggerCharacters: [","],
-        provideSignatureHelp: (model, position, token, context) => {
-        }
-    });
+    //监听变化
+    onDidChangeContent();
+    //调整两个editor的大小
+    module.handleMouseMove();
+    //添加快捷键
+    addCommand();
+    //添加右键菜单
+    addAction();
 
-
+    /**
+     * 获取编辑器内容的语法错误
+     * @param {monaco.editor.ITextModel} model - 编辑器的 Text Model
+     */
     async function getModelMarkers(model) {
         let code = model.getValue();
         let result = await dotNetObject.invokeMethodAsync('GetModelMarkers', code, 80);
@@ -129,65 +122,92 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
                 code: elem.Id
             });
         }
-        console.log(markers)
         monaco.editor.setModelMarkers(model, 'csharp', markers);
     }
 
-    monacoInterop.editors['editorId'].getModel().onDidChangeContent(event => {
-        getModelMarkers(monacoInterop.editors['editorId'].getModel());
-    })
-
-
-    //添加快捷键
-    let editor = monacoInterop.editors['editorId'];
-
-    // 添加 Ctrl/Cmd + S 快捷键命令，保存代码到本地存储
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-        localStorage.setItem('oldCode', monacoInterop.editors['editorId'].getValue());
-    });
-
-    // 添加 Ctrl/Cmd + K 快捷键命令，使用 .NET 方法格式化代码
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
-        dotNetObject.invokeMethodAsync('FormatCode', monacoInterop.editors['editorId'].getValue())
-            .then(formatCode => { monacoInterop.editors['editorId'].setValue(formatCode); });
-    });
-    editor.addCommand(monaco.KeyCode.F2, () => {
-        console.log(111);
-    });
-
-    // 添加 Ctrl/Cmd + D 快捷键命令，复制当前行并插入新行
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyD, () => {
-        let lineNumber = editor.getPosition().lineNumber;
-        let lineText = editor.getModel().getLineContent(lineNumber);
-        editor.getModel().applyEdits([
-            { range: new monaco.Range(lineNumber, 1, lineNumber, 1), text: lineText + '\n' }
-        ]);
-        editor.setPosition(new monaco.Position(lineNumber + 1, lineText.length + 1));
-    });
-
-    //添加右键
-    module.addAction(editor);
-    let isChecked = false;
-
-    let myAction = editor.addAction({
-        id: 'checkRun',
-        label: '切换成自动运行',
-        contextMenuOrder: 0,
-        contextMenuGroupId: "code",
-        run: async function (editor) {
-            editor.onDidChangeModelContent(async (event) => {
-                const position = editor.getPosition();
-                const range = new monaco.Range(position.lineNumber, position.column - 1, position.lineNumber, position.column);
-                const text = editor.getModel().getValueInRange(range);
-                if (text.slice(-1) === ';') {
-                    console.log(text);
-                    const result = await dotNetObject.invokeMethodAsync("AutoRunCode", editor.getValue());
-                    console.log("result" + result);
-                    monacoInterop.editors["resultId"].setValue(result);
+    /**
+     * 当编辑器内容发生变化时，执行回调函数
+     */
+    async function onDidChangeContent() {
+        csharpEditor.getModel().onDidChangeContent(async (event) => {
+            getModelMarkers(csharpEditor.getModel());
+            if (autoRun) {
+                const position = csharpEditor.getPosition();
+                const model = csharpEditor.getModel();
+                const lineContent = model.getLineContent(position.lineNumber);
+                const char = lineContent.charAt(position.column - 1);
+                console.log(char + " text")
+                if (char === ';') {
+                    const result = await dotNetObject.invokeMethodAsync("AutoRunCode", csharpEditor.getValue());
+                    monacoInterop.editors['resultId'].setValue(result);
                 }
-            });
-        }
-    });
+            }
+        })
+    }
+
+    /**
+     * 异步函数，用于从后端获取建议列表
+     * @param {string} code - 当前编辑器中的代码
+     * @param {monaco.Position} position - 光标所在位置
+     * @returns {Array} - 建议列表
+     */
+    async function getProvidersAsync(code, position) {
+        let suggestions = [];
+        await dotNetObject.invokeMethodAsync('ProvideCompletionItems', code, position).then(result => {
+            let res = JSON.parse(result);
+            suggestions = module.suggestionsTab.slice();
+            for (let key in res) {
+                suggestions.push({
+                    label: {
+                        label: key,
+                        description: res[key]
+                    },
+                    kind: monaco.languages.CompletionItemKind.Function,
+                    insertText: key
+                });
+            }
+        });
+        return suggestions;
+    }
+   
+    async function addCommand() {
+        // 添加 Ctrl/Cmd + S 快捷键命令，保存代码到本地存储
+        csharpEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+            localStorage.setItem('oldCode', csharpEditor.getValue());
+        });
+
+        // 添加 Ctrl/Cmd + K 快捷键命令，使用 .NET 方法格式化代码
+        csharpEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
+            dotNetObject.invokeMethodAsync('FormatCode', csharpEditor.getValue())
+                .then(formatCode => { csharpEditor.setValue(formatCode); });
+        });
+
+
+        // 添加 Ctrl/Cmd + D 快捷键命令，复制当前行并插入新行
+        csharpEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyD, () => {
+            let lineNumber = csharpEditor.getPosition().lineNumber;
+            let lineText = csharpEditor.getModel().getLineContent(lineNumber);
+            csharpEditor.getModel().applyEdits([
+                { range: new monaco.Range(lineNumber, 1, lineNumber, 1), text: lineText + '\n' }
+            ]);
+            csharpEditor.setPosition(new monaco.Position(lineNumber + 1, lineText.length + 1));
+        });
+    }
+    async function addAction() {
+        module.addAction(csharpEditor);
+
+        csharpEditor.addAction({
+            id: 'checkRun',
+            label: '切换运行模式',
+            contextMenuOrder: 0,
+            contextMenuGroupId: "code",
+            run: async function (editor) {
+                autoRun = !autoRun;
+                console.log(autoRun);
+            }
+        });
+    }
+   
 }
 
 
