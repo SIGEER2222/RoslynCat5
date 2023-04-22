@@ -1,37 +1,90 @@
-
+ï»¿
 let assemblies = null;
 
+/**
+ * ç›‘å¬æ‹–åŠ¨å¥æŸ„çš„é¼ æ ‡ç§»åŠ¨äº‹ä»¶ï¼Œæ ¹æ®é¼ æ ‡ç§»åŠ¨çš„è·ç¦»æ¥è°ƒæ•´å·¦å³ä¸¤ä¸ªé¢æ¿çš„å®½åº¦
+ */
+export function handleMouseMove() {
+    // è·å–æ‹–åŠ¨æ¡å’Œå·¦å³ä¸¤ä¸ªé¢æ¿çš„ DOM å…ƒç´ 
+    const handle = document.querySelector('.handle');
+    const leftPane = document.querySelector('.left-pane');
+    const rightPane = document.querySelector('.right-pane');
 
+    // å®šä¹‰ä¸€äº›å˜é‡æ¥å­˜å‚¨æ‹–åŠ¨çš„çŠ¶æ€
+    let startX;
+    let initialWidth;
+    let leftWidth = leftPane.offsetWidth;
+    let rightWidth = rightPane.offsetWidth;
+
+    // å½“é¼ æ ‡æŒ‰ä¸‹æ‹–åŠ¨æ¡æ—¶è§¦å‘è¯¥äº‹ä»¶
+    handle.addEventListener('mousedown', function (e) {
+        // è®°å½•é¼ æ ‡çš„åˆå§‹ä½ç½®å’Œå·¦å³ä¸¤ä¸ªé¢æ¿çš„å®½åº¦
+        leftWidth = leftPane.offsetWidth;
+        rightWidth = rightPane.offsetWidth;
+        startX = e.clientX;
+        initialWidth = leftPane.offsetWidth + rightPane.offsetWidth;
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    });
+
+    // å½“é¼ æ ‡ç§»åŠ¨æ—¶è§¦å‘è¯¥äº‹ä»¶
+    function handleMouseMove(event) {
+        let delta = event.clientX - startX;
+        // è®¡ç®—å·¦å³ä¸¤ä¸ªé¢æ¿çš„æ–°å®½åº¦
+        let newLeftPaneWidth = leftWidth + delta;
+        let newRightPaneWidth = rightWidth - delta;
+
+        if (newLeftPaneWidth < 0) {
+            newLeftPaneWidth = 0;
+            newRightPaneWidth = initialWidth;
+        }
+        else if (newRightPaneWidth < 0) {
+            newRightPaneWidth = 0;
+            newLeftPaneWidth = initialWidth;
+        }
+
+        // è®¾ç½®å·¦å³ä¸¤ä¸ªé¢æ¿çš„æ–°å®½åº¦
+        leftPane.style.width = newLeftPaneWidth + 'px';
+        rightPane.style.width = newRightPaneWidth + 'px';
+    }
+
+    // å½“é¼ æ ‡æŠ¬èµ·æ—¶è§¦å‘è¯¥äº‹ä»¶
+    function handleMouseUp() {
+        // æ³¨é”€é¼ æ ‡ç§»åŠ¨å’Œé¼ æ ‡æŠ¬èµ·äº‹ä»¶çš„ç›‘å¬å™¨
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+    }
+}
 
 export function showMessageBox() {
-    // »ñÈ¡ÏûÏ¢¿òÔªËØ
+    // è·å–æ¶ˆæ¯æ¡†å…ƒç´ 
     const messageBox = document.querySelector('#messageBox');
-    // ÏÔÊ¾ÏûÏ¢¿ò
+    // æ˜¾ç¤ºæ¶ˆæ¯æ¡†
     messageBox.style.display = 'block';
-    // ÔÚ 5 Ãëºó×Ô¶¯¹Ø±ÕÏûÏ¢¿ò
+    // åœ¨ 5 ç§’åè‡ªåŠ¨å…³é—­æ¶ˆæ¯æ¡†
     setTimeout(function () {
         hideMessageBox();
     }, 5000);
 
     function hideMessageBox() {
-        // Òş²ØÏûÏ¢¿ò
+        // éšè—æ¶ˆæ¯æ¡†
         messageBox.style.display = 'none';
     }
 }
 
 /**
- * ¸´ÖÆÎÄ±¾µ½¼ôÌù°å£¬²¢ÏÔÊ¾Ò»¸öÄ£Ì¬¿ò¡£
+ * å¤åˆ¶æ–‡æœ¬åˆ°å‰ªè´´æ¿ï¼Œå¹¶æ˜¾ç¤ºä¸€ä¸ªæ¨¡æ€æ¡†ã€‚
  *
- * @param {string} text - Òª¸´ÖÆµÄÎÄ±¾¡£
+ * @param {string} text - è¦å¤åˆ¶çš„æ–‡æœ¬ã€‚
  */
 export function copyText(text) {
-    // ½«ÎÄ±¾¸´ÖÆµ½¼ôÌù°å
+    // å°†æ–‡æœ¬å¤åˆ¶åˆ°å‰ªè´´æ¿
     navigator.clipboard.writeText(text)
         .then(() => {
             console.log(text);
         })
         .catch(err => {
-            // ¸´ÖÆÊ§°ÜÊ±µ¯³ö¾¯¸æ¿ò
+            // å¤åˆ¶å¤±è´¥æ—¶å¼¹å‡ºè­¦å‘Šæ¡†
             alert('Failed to copy: ', err);
         });
 }
@@ -47,7 +100,7 @@ async function sendRequest(type, request) {
         case 'hover': endPoint = '/completion/hover'; break;
         case 'codeCheck': endPoint = '/completion/codeCheck'; break;
     }
-    // Ìí¼ÓÇëÇóÀ¹½ØÆ÷
+    // æ·»åŠ è¯·æ±‚æ‹¦æˆªå™¨
     axios.interceptors.request.use(request => {
         console.log('Starting Request', request)
         return request
@@ -342,20 +395,20 @@ export function getType(type) {
     return legend.tokenTypes.indexOf(type);
 }
 
-/** »ñÈ¡mod
+/** è·å–mod
  *  @type {(modifier: string[]|string|null)=>number} 
- * @param grid {Ext.Grid.Panel} ĞèÒªºÏ²¢µÄGrid
-* @param cols {Array} ĞèÒªºÏ²¢ÁĞµÄIndex(ĞòºÅ)Êı×é£»´Ó0¿ªÊ¼¼ÆÊı£¬ĞòºÅÒ²°üº¬¡£
-* @param isAllSome {Boolean} £ºÊÇ·ñ2¸ötrµÄcols±ØĞëÍê³ÉÒ»Ñù²ÅÄÜ½øĞĞºÏ²¢¡£true£ºÍê³ÉÒ»Ñù£»false(Ä¬ÈÏ)£º²»ÍêÈ«Ò»Ñù
+ * @param grid {Ext.Grid.Panel} éœ€è¦åˆå¹¶çš„Grid
+* @param cols {Array} éœ€è¦åˆå¹¶åˆ—çš„Index(åºå·)æ•°ç»„ï¼›ä»0å¼€å§‹è®¡æ•°ï¼Œåºå·ä¹ŸåŒ…å«ã€‚
+* @param isAllSome {Boolean} ï¼šæ˜¯å¦2ä¸ªtrçš„colså¿…é¡»å®Œæˆä¸€æ ·æ‰èƒ½è¿›è¡Œåˆå¹¶ã€‚trueï¼šå®Œæˆä¸€æ ·ï¼›false(é»˜è®¤)ï¼šä¸å®Œå…¨ä¸€æ ·
 * @return void
 * @author polk6 2015/07/21 
 * @example
 * _________________                             _________________
-* |  ÄêÁä |  ĞÕÃû |                             |  ÄêÁä |  ĞÕÃû |
+* |  å¹´é¾„ |  å§“å |                             |  å¹´é¾„ |  å§“å |
 * -----------------      mergeCells(grid,[0])   -----------------
-* |  18   |  ÕÅÈı |              =>             |       |  ÕÅÈı |
+* |  18   |  å¼ ä¸‰ |              =>             |       |  å¼ ä¸‰ |
 * -----------------                             -  18   ---------
-* |  18   |  ÍõÎå |                             |       |  ÍõÎå |
+* |  18   |  ç‹äº” |                             |       |  ç‹äº” |
 * -----------------                             -----------------
  */
 export function getModifier(modifiers) {
@@ -392,7 +445,7 @@ export function registerDocumentSemanticTokensProvider() {
 
             let result = computeDocumentSemanticTokens(model, token);
 
-            // ½«½á¹ûÌí¼Óµ½»º´æÖĞ
+            // å°†ç»“æœæ·»åŠ åˆ°ç¼“å­˜ä¸­
             let resultId = uuidv4();
             cache.set(resultId, result);
 
@@ -418,7 +471,7 @@ export function registerDocumentSemanticTokensProvider() {
 
             let lineTokens = computeLineSemanticTokens(line, offset, token);
             tokens = tokens.concat(lineTokens);
-            offset += line.length + 1; // +1 ÊÇÒòÎªÃ¿ĞĞÄ©Î²»áÓĞÒ»¸ö»»ĞĞ·û
+            offset += line.length + 1; // +1 æ˜¯å› ä¸ºæ¯è¡Œæœ«å°¾ä¼šæœ‰ä¸€ä¸ªæ¢è¡Œç¬¦
         }
 
         return { tokens };
@@ -427,7 +480,7 @@ export function registerDocumentSemanticTokensProvider() {
     function computeLineSemanticTokens(line, offset, token) {
         let tokens = [];
 
-        // ... ¸ù¾İÓï·¨¹æÔò¼ÆËã³ö¸ÃĞĞµÄÓïÒåµ¥Ôª ...
+        // ... æ ¹æ®è¯­æ³•è§„åˆ™è®¡ç®—å‡ºè¯¥è¡Œçš„è¯­ä¹‰å•å…ƒ ...
 
         return tokens;
     }
@@ -457,32 +510,20 @@ export function createEditor(elementId, value) {
         automaticLayout: true,
         contextmenu: true,
         copyWithSyntaxHighlighting: true,
+        resizeToFit: true // å¯ç”¨ resizeToFit
     });
     return editor;
 }
 
 
 /**
- * Ìá¹©ÓÃÓÚ´úÂë×Ô¶¯²¹È«µÄ½¨ÒéÏîÊı×é
- *
- * @typedef {Object} CompletionLabel
- * @property {string} label - ½¨ÒéÏîµÄÏÔÊ¾ÎÄ±¾
- * @property {string} description - ½¨ÒéÏîµÄÃèÊö
- *
- * @typedef {Object} CompletionItem
- * @property {CompletionLabel} label - ½¨ÒéÏîµÄ±êÇ©
- * @property {monaco.languages.CompletionItemKind} kind - ½¨ÒéÏîµÄÖÖÀà
- * @property {monaco.languages.CompletionItemInsertTextRule} insertTextRules - ½¨ÒéÏîµÄ²åÈëÎÄ±¾¹æÔò
- * @property {string} insertText - ½¨ÒéÏîµÄ²åÈëÎÄ±¾
- * @property {string} sortText - ½¨ÒéÏîµÄÅÅĞòÎÄ±¾
- *
- * @type {CompletionItem[]} ½¨ÒéÏîÊı×é
+ * æä¾›ç”¨äºä»£ç è‡ªåŠ¨è¡¥å…¨çš„å»ºè®®é¡¹æ•°ç»„
  */
 export const suggestionsTab = [
     {
         label: {
             label: 'cw',
-            description: '¿ì½İ¼üConsole.WriteLine();',
+            description: 'å¿«æ·é”®Console.WriteLine();',
         },
         kind: monaco.languages.CompletionItemKind.Snippet,
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
@@ -492,7 +533,7 @@ export const suggestionsTab = [
     {
         label: {
             label: 'for',
-            description: 'for Ñ­»·',
+            description: 'for å¾ªç¯',
         },
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         insertText: 'for (int i = 0; i < ${1:length}; i++)\n{\n\t${2://code...}\n}',
@@ -500,7 +541,7 @@ export const suggestionsTab = [
     {
         label: {
             label: 'prop',
-            description: '×Ô¶¯ÊôĞÔ',
+            description: 'è‡ªåŠ¨å±æ€§',
         },
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         sortText: '0',
@@ -509,7 +550,7 @@ export const suggestionsTab = [
     {
         label: {
             label: 'while',
-            description: 'while Ñ­»·',
+            description: 'while å¾ªç¯',
         },
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         sortText: '0',
@@ -518,7 +559,7 @@ export const suggestionsTab = [
     {
         label: {
             label: 'try',
-            description: 'try-catch ¿é',
+            description: 'try-catch å—',
         },
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         sortText: '0',
@@ -528,7 +569,7 @@ export const suggestionsTab = [
     {
         label: {
             label: 'foreach',
-            description: 'foreach Ñ­»·',
+            description: 'foreach å¾ªç¯',
         },
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         sortText: '0',
@@ -538,7 +579,7 @@ export const suggestionsTab = [
     {
         label: {
             label: 'if',
-            description: 'if Óï¾ä',
+            description: 'if è¯­å¥',
         },
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         sortText: '0',
@@ -547,10 +588,68 @@ export const suggestionsTab = [
     {
         label: {
             label: 'else',
-            description: 'else Óï¾ä',
+            description: 'else è¯­å¥',
         },
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         sortText: '0',
         insertText: 'else {\n\t${1://code...}\n}$0',
     },
 ];
+
+
+/**
+ * è¿™æ˜¯ä¸€ä¸ªæ·»åŠ å‘½ä»¤çš„å‡½æ•°
+ * @param {object} editor - Monaco Editor å®ä¾‹
+ */
+export function addCommand(editor) {
+    // æ·»åŠ  Ctrl/Cmd + S å¿«æ·é”®å‘½ä»¤ï¼Œä¿å­˜ä»£ç åˆ°æœ¬åœ°å­˜å‚¨
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+        localStorage.setItem('oldCode', monacoInterop.editors['editorId'].getValue());
+    });
+
+    // æ·»åŠ  Ctrl/Cmd + K å¿«æ·é”®å‘½ä»¤ï¼Œä½¿ç”¨ .NET æ–¹æ³•æ ¼å¼åŒ–ä»£ç 
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
+        dotNetObject.invokeMethodAsync('FormatCode', monacoInterop.editors['editorId'].getValue())
+            .then(formatCode => { monacoInterop.editors['editorId'].setValue(formatCode); });
+    });
+
+    // æ·»åŠ  Ctrl/Cmd + D å¿«æ·é”®å‘½ä»¤ï¼Œå¤åˆ¶å½“å‰è¡Œå¹¶æ’å…¥æ–°è¡Œ
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyD, () => {
+        let lineNumber = editor.getPosition().lineNumber;
+        let lineText = editor.getModel().getLineContent(lineNumber);
+        editor.getModel().applyEdits([
+            { range: new monaco.Range(lineNumber, 1, lineNumber, 1), text: lineText + '\n' }
+        ]);
+        editor.setPosition(new monaco.Position(lineNumber + 1, lineText.length + 1));
+    });
+}
+
+
+/**
+ * è¿™æ˜¯ä¸€ä¸ªæ·»åŠ å‘½ä»¤çš„å‡½æ•°
+ * @param {object} editor - Monaco Editor å®ä¾‹
+ */
+export function addAction(editor) {
+    // æ·»åŠ æ ¼å¼åŒ–ä»£ç çš„å‘½ä»¤
+    editor.addAction({
+        id: "formatCode",
+        label: "æ ¼å¼åŒ–ä»£ç  ctrl + k",
+        contextMenuOrder: 0,
+        contextMenuGroupId: "code",
+        run: function (editor) {
+            dotNetObject.invokeMethodAsync('FormatCode', editor.getValue())
+                .then(formatCode => { editor.setValue(formatCode); });
+        }
+    });
+
+    // æ·»åŠ æ¸…é™¤ä»£ç çš„å‘½ä»¤
+    editor.addAction({
+        id: "clear",
+        label: "æ¸…é™¤",
+        contextMenuOrder: 1,
+        contextMenuGroupId: "code",
+        run: function (editor) {
+            editor.setValue(defaultCode);
+        }
+    });
+}

@@ -3,11 +3,6 @@
     width: 100%;
 }
 
-div {
-    /*border-radius: 5px;*/
-}
-
-
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -50,8 +45,6 @@ div {
     background-color: rgba(0,0,0,0.4);
 }
 
-.title {
-}
 
 .modal-content {
     background-color: #fefefe;
@@ -364,7 +357,7 @@ div {
 
 .left-pane,
 .right-pane {
-    flex: 1;
+    /*flex: 1;*/
     height: 100%;
     min-width: 0;
     overflow: auto;
@@ -534,4 +527,32 @@ div {
 
 .message-box-content {
     margin-top: 10px;
+}
+
+/*±à¼­Æ÷ÍÏ¶¯*/
+.split-container {
+    display: flex;
+    height: 100%;
+}
+
+.resizable {
+    position: relative;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.left-pane {
+    background-color: #f0f0f0;
+}
+
+.right-pane {
+    background-color: #e0e0e0;
+}
+
+.handle {
+    position: relative;
+    width: 10px;
+    cursor: col-resize;
+    z-index: 1;
+    background-color: #ccc;
 }

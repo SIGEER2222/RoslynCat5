@@ -9,6 +9,8 @@
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
+		<Authors>Sigeer</Authors>
+		<Description>毕设项目</Description>
 	</PropertyGroup>
 
 	<ItemGroup>

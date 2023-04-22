@@ -24,7 +24,6 @@ monacoInterop.getOldCode = () => {
 //创建和初始化编辑器
 monacoInterop.createEditor = (elementId, code) => {
     let editor;
-    console.log('source:' + code);
     if (elementId == 'editorId') {
         if (code != defaultCode) {
             sourceCode = code;
@@ -37,7 +36,6 @@ monacoInterop.createEditor = (elementId, code) => {
         editor = module.createEditor(elementId, code);
     }
     monacoInterop.editors[elementId] = editor;
-    console.log("初始化完毕")
 }
 
 
@@ -48,31 +46,32 @@ monacoInterop.CSharpRegister = (elementId) => {
 //注册C#语言的语法提示、快捷键等
 monacoInterop.registerMonacoProviders = async (dotNetObject) => {
 
+    module.handleMouseMove();
+
     //注册自动完成提供程序
     async function getProvidersAsync(code, position) {
-        let suggestions = module.suggestionsTab;
+        let suggestions = [];
         await dotNetObject.invokeMethodAsync('ProvideCompletionItems', code, position).then(result => {
-            let r = JSON.parse(result);
-            for (let key in r) {
+            let res = JSON.parse(result);
+            suggestions = module.suggestionsTab.slice();
+            for (let key in res) {
                 suggestions.push({
                     label: {
                         label: key,
-                        description: r[key]
+                        description: res[key]
                     },
                     kind: monaco.languages.CompletionItemKind.Function,
                     insertText: key
                 });
             }
         });
-        //return suggestionsTab.concat(suggestions);
         return suggestions;
     }
 
     monaco.languages.registerCompletionItemProvider(languageId, {
         triggerCharacters: ['.', ' ', ','],
         provideCompletionItems: async (model, position) => {
-            let cursor = model.getOffsetAt(position);
-            const suggestions = await getProvidersAsync(model.getValue(), cursor);
+            const suggestions = await getProvidersAsync(model.getValue(), model.getOffsetAt(position));
             return { suggestions: suggestions };
         }
     });
@@ -105,37 +104,6 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
         signatureHelpTriggerCharacters: ["("],
         signatureHelpRetriggerCharacters: [","],
         provideSignatureHelp: (model, position, token, context) => {
-            console.log(111)
-            // 获取当前位置的单词
-            const word = model.getWordUntilPosition(position);
-            if (!word) {
-                return null;
-            }
-
-            // 判断当前单词是否为 Console.WriteLine
-            if (word.word !== 'Console' || model.getValueInRange({ startLineNumber: position.lineNumber, startColumn: word.endColumn, endLineNumber: position.lineNumber, endColumn: position.column }).indexOf("WriteLine") === -1) {
-                return null;
-            }
-
-            // 提取 Console.WriteLine 函数签名和参数信息
-            const signature = {
-                label: "Console.WriteLine(value: string): void",
-                documentation: "Writes the specified string value, followed by the current line terminator, to the standard output stream.",
-                parameters: [{
-                    label: "value: string",
-                    documentation: "The string value to write."
-                }]
-            };
-
-            // 返回 Console.WriteLine 函数签名信息
-            return {
-                value: {
-                    activeSignature: 0,
-                    activeParameter: Math.min(context.argumentIndex, signature.parameters.length - 1),
-                    signatures: [signature]
-                },
-                dispose: () => { }
-            };
         }
     });
 
@@ -143,12 +111,10 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
     async function getModelMarkers(model) {
         let code = model.getValue();
         let result = await dotNetObject.invokeMethodAsync('GetModelMarkers', code, 80);
-        console.log(result);
         let markers = [];
         let posStart;
         let posEnd;
         result = JSON.parse(result);
-        console.log(result);
         for (let elem of result) {
             posStart = model.getPositionAt(elem.OffsetFrom);
             posEnd = model.getPositionAt(elem.OffsetTo);
@@ -162,56 +128,21 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
                 code: elem.Id
             });
         }
-        //const markers = monaco.editor.getModelMarkers({ resource: uri })
         console.log(markers)
         monaco.editor.setModelMarkers(model, 'csharp', markers);
-        // markers是返回的错误信息数组，可赋值给需要判断语法错误的关键词，如this.coderErrors = markers
     }
 
     monacoInterop.editors['editorId'].getModel().onDidChangeContent(event => {
-        //TODO设置一个定时器
         getModelMarkers(monacoInterop.editors['editorId'].getModel());
     })
 
 
     //添加快捷键
     let editor = monacoInterop.editors['editorId'];
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-        localStorage.setItem('oldCode', monacoInterop.editors['editorId'].getValue());
-    });
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
-        dotNetObject.invokeMethodAsync('FormatCode', monacoInterop.editors['editorId'].getValue())
-            .then(formatCode => { monacoInterop.editors['editorId'].setValue(formatCode); });
-    });
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyD, () => {
-        let lineNumber = editor.getPosition().lineNumber;
-        let lineText = editor.getModel().getLineContent(lineNumber);
-        editor.getModel().applyEdits([
-            { range: new monaco.Range(lineNumber, 1, lineNumber, 1), text: lineText + '\n' }
-        ]);
-        editor.setPosition(new monaco.Position(lineNumber + 1, lineText.length + 1));
-    });
+    module.addCommand(editor);
 
     //添加右键
-    editor.addAction({
-        id: "formatCode",
-        label: "格式化代码 ctrl + k",
-        contextMenuOrder: 0,
-        contextMenuGroupId: "code",
-        run: function (editor) {
-            dotNetObject.invokeMethodAsync('FormatCode', editor.getValue())
-                .then(formatCode => { editor.setValue(formatCode); });
-        }
-    });
-    editor.addAction({
-        id: "clear",
-        label: "清除",
-        contextMenuOrder: 1,
-        contextMenuGroupId: "code",
-        run: function (editor) {
-            editor.setValue(defaultCode);
-        }
-    });
+    module.addAction(editor);
 }
 
 
@@ -290,7 +221,9 @@ monacoInterop.quickFix = () => {
 
 //代码分享
 monacoInterop.copyText = module.copyText;
-monacoInterop.messageBox = 
+
+//
+
 window.monacoInterop = monacoInterop;
 
 console.log("end")
