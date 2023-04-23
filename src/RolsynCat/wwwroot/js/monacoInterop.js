@@ -2,9 +2,17 @@
 import * as module from "./module.js";
 
 let languageId = "csharp";
+let resultId = "resultId";
+
 let monacoInterop = {};
 monacoInterop.editors = {};
+
+/**代码编辑器实例 */
 let csharpEditor = {};
+
+/**输出结果实例 */
+let resultEditor = {};
+
 let defaultCode =
     [
         `using System;
@@ -136,7 +144,6 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
                 const model = csharpEditor.getModel();
                 const lineContent = model.getLineContent(position.lineNumber);
                 const char = lineContent.charAt(position.column - 1);
-                console.log(char + " text")
                 if (char === ';') {
                     const result = await dotNetObject.invokeMethodAsync("AutoRunCode", csharpEditor.getValue());
                     monacoInterop.editors['resultId'].setValue(result);

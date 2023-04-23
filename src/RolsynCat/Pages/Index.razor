@@ -1,7 +1,7 @@
 ﻿@page "/"
-@page "/index"
 @page "/codeshare/{gistId}"
 @using RoslynCat.Data
+@using RoslynCat.Pages;
 @inject NavigationManager NavigationManager
 
 <div class="container">
@@ -21,7 +21,7 @@
                     </div>
                 </div>
             }
-            <Dropdown />
+            <Dropdown OptionSelectedCallback ="@HandleOptionSelected"/>
             <a class="" href="https://github.com/SIGEER2222/RoslynCat">RolsynCat in Github</a>
         </div>
     </div>
@@ -68,6 +68,11 @@
         InputValue = newValue;
     }
 
+    private async Task HandleOptionSelected(Dropdown.Option option) { 
+        Console.WriteLine($"选择了 {option.Title}");
+    }
     private string GetConsoleValue() => consoleIn.InputValue;
 
+   
+    
 }

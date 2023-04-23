@@ -244,6 +244,7 @@ export const Monarch = {
         comment: [
             [/[^\/*]+/, 'comment'],
             // [/\/\*/,    'comment', '@push' ],    // no nested comments :-(
+            [/(https?:\/\/[^\s]+)/, 'comment.link'],
             ['\\*/', 'comment', '@pop'],
             [/[\/*]/, 'comment']
         ],

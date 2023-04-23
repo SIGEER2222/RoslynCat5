@@ -14,7 +14,7 @@
                     </div>
                     @foreach (var option in group) {
                         <div class="dropdown-option" @onclick="() => OptionSelected(option)">
-                            @option.Text
+                            @option.Title
                         </div>
                     }
                 </div>
@@ -25,34 +25,36 @@
 
 @code {
     private bool IsDropdownVisible { get; set; }
+    [Parameter]
+    public EventCallback<Option> OptionSelectedCallback { get; set; }
     private List<Option> Options { get; set; } = new List<Option>
-            {
-            new Option { Group = "C#基础", Text = "关键字" },
-            new Option { Group = "C#基础", Text = "操作符" },
-            new Option { Group = "C#基础", Text = "控制语句" },
-            new Option { Group = "C#基础", Text = "数组" },
-            new Option { Group = "C#基础", Text = "类型系统" },
-            new Option { Group = "C#基础", Text = "方法" },
-            new Option { Group = "C# Advanced", Text = "Delegates and Events" },
-            new Option { Group = "C# Advanced", Text = "Generics" },
-            new Option { Group = "C# Advanced", Text = "LINQ" },
-            new Option { Group = "C# Advanced", Text = "Multithreading" },
-            new Option { Group = "C# Advanced", Text = "Asynchronous Programming" },
-            new Option { Group = "C# Advanced", Text = "Reflection" },
+                {
+            new Option { Group = "C#基础", Title = "关键字" },
+            new Option { Group = "C#基础", Title = "操作符" },
+            new Option { Group = "C#基础", Title = "控制语句" },
+            new Option { Group = "C#基础", Title = "数组" },
+            new Option { Group = "C#基础", Title = "类型系统" },
+            new Option { Group = "C#基础", Title = "方法" },
+            new Option { Group = "C# Advanced", Title = "Delegates and Events" },
+            new Option { Group = "C# Advanced", Title = "Generics" },
+            new Option { Group = "C# Advanced", Title = "LINQ" },
+            new Option { Group = "C# Advanced", Title = "Multithreading" },
+            new Option { Group = "C# Advanced", Title = "Asynchronous Programming" },
+            new Option { Group = "C# Advanced", Title = "Reflection" },
         };
 
-    private class Option
-    {
+    public class Option {
         public string Group { get; set; }
-        public string Text { get; set; }
+        public string Title { get; set; }
+        public string Value { get; set; }
     }
 
     private void ToggleDropdown() {
         IsDropdownVisible = !IsDropdownVisible;
     }
 
-    private void OptionSelected(Option option) {
-        Console.WriteLine($"Selected option: {option.Text}");
+    private async Task OptionSelected(Option option) {
+        await OptionSelectedCallback.InvokeAsync(option);
         IsDropdownVisible = false;
     }
 }

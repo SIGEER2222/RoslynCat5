@@ -1,7 +1,7 @@
 ﻿namespace RoslynCat.Interface
 {
-    public interface IResponse
-    {
+	public interface IResponse
+	{
 
-    }
+	}
 }
