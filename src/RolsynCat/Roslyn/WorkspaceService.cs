@@ -32,7 +32,7 @@ namespace RoslynCat.Roslyn
 								.WithOptimizationLevel(OptimizationLevel.Release)
 								.WithUsings(new[] { "System" });
 
-			var projectInfo = ProjectInfo.Create(ProjectId.CreateNewId(),
+            var projectInfo = ProjectInfo.Create(ProjectId.CreateNewId(),
 								version: VersionStamp.Create(),
 								name: "MyProject",
 								assemblyName: "MyAssembly",

@@ -243,17 +243,17 @@ monacoInterop.setLanguageConfiguration = () => monaco.languages.setLanguageConfi
     indentationRules: module.languageConfiguration.indentationRules,
 });
 
-// 创建model触发
-monacoInterop.onDidCreateModel = () => monaco.editor.onDidCreateModel(function (model) {
-    module.validate(model)
-})
+// // 创建model触发
+// monacoInterop.onDidCreateModel = () => monaco.editor.onDidCreateModel(function (model) {
+//     module.validate(model)
+// })
 
-// 监听变化
-monacoInterop.onDidChangeContent = () => monaco.editor.onDidChangeContent(() => {
-    monaco.editor.setModelMarkers(model, 'csharp', []);
-    clearTimeout(handle);
-    handle = setTimeout(() => module.validate(), 500);
-})
+// // 监听变化
+// monacoInterop.onDidChangeContent = () => monaco.editor.onDidChangeContent(() => {
+//     monaco.editor.setModelMarkers(model, 'csharp', []);
+//     clearTimeout(handle);
+//     handle = setTimeout(() => module.validate(), 500);
+// })
 
 //设置主题颜色
 monacoInterop.setTheme = () => {
