@@ -1,6 +1,10 @@
+using Autofac.Core;
 using RoslynCat.Controllers;
 using RoslynCat.Interface;
 using RoslynCat.Roslyn;
+using RoslynCat.SQL;
+using SqlSugar;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,23 +24,29 @@ builder.Services.AddTransient<ICodeCheckProvider,CodeCheckProvider>();
 
 builder.Services.AddHttpClient("GithubApi",client =>
 {
-	client.BaseAddress = new Uri("https://api.github.com");
+    client.BaseAddress = new Uri("https://api.github.com");
 });
 
 builder.Services.AddTransient<IGistService,CodeSharing>();
 builder.Services.AddTransient<CompletionProvider>();
+builder.Services.AddTransient<CodeSampleRepository>();
+
+builder.Services.AddHttpContextAccessor();
+
+// 注册ISqlSugarClient接口和SqlSugarConfiguration类
+builder.Services.AddScoped<ISqlSugarClient>(provider => SqlSugarConfiguration.Configure());
 
 var app = builder.Build();
 app.UsePathBase("/");
 
 if (!app.Environment.IsDevelopment()) {
-	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-	app.UseHsts();
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
 
 if (app.Environment.IsDevelopment()) {
-	app.UseSwagger();
-	app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

@@ -3,7 +3,7 @@
 #### 命名样式 ####
 
 # 命名规则
-
+dotnet_diagnostic.CA1502.severity = warning
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = suggestion
 dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
 dotnet_naming_rule.interface_should_be_begins_with_i.style = begins_with_i

@@ -7,3 +7,6 @@
 /BlazorApp1
 /src/RolsynCat/.config
 /src/.idea/.idea.RoslynCat/.idea
+/src/CodeManagement/appsettings.json
+/src/CodeManagement/bin/Debug/net7.0
+/src/CodeManagement/obj

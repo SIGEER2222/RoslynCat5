@@ -1,0 +1,63 @@
+﻿@page "/codesampleform"
+@using RoslynCat.SQL;
+
+@inject CodeSampleRepository codeSampleRepository;
+<h1>@addTitle</h1>
+<EditForm Model="@codeSample" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <ValidationMessage For="@(() => codeSample.Title)" />
+    <div class="form-group">
+        <label>Group:</label>
+        <InputSelect @bind-Value="@codeSample.Group" class="form-control">
+            <option value="C#基础语法">C#基础语法</option>
+            <option value="C#进阶技巧">C#进阶技巧</option>
+            <option value="C#算法实现">C#算法实现</option>
+        </InputSelect>
+    </div>
+
+    <div class="form-group">
+        <label>Title:</label><label style="color: red">@errorMessage</label>
+        <InputText @bind-Value="@codeSample.Title" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Code:</label>
+        <InputTextArea @bind-Value="@codeSample.Code" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">提交</button>
+</EditForm>
+
+
+@code {
+
+    private EditContext editContext;
+    private CodeSample codeSample;
+    private ValidationMessageStore messageStore;
+    private string errorMessage;
+    private string addTitle = "添加代码";
+    protected override void OnInitialized() {
+        codeSample = new CodeSample() {
+                Language = "C#",
+                CreatedAt = DateTime.UtcNow,
+                Group = "C#基础语法",
+            };
+        editContext = new EditContext(codeSample);
+        messageStore = new ValidationMessageStore(editContext);
+    }
+
+    private async Task HandleValidSubmit() {
+        if (codeSampleRepository.HaveTitle(codeSample.Title)) {
+            errorMessage = $"{codeSample.Title}已经存在";
+            messageStore.Add(editContext.Field(nameof(CodeSample.Title)),errorMessage);
+            editContext.NotifyValidationStateChanged();
+            return;
+        }
+        else {
+            errorMessage = string.Empty;
+            codeSample.ModifiedDate = DateTime.UtcNow;
+            await codeSampleRepository.Add(codeSample);
+            addTitle = $"{codeSample.Title} 已成功添加";
+        }
+    }
+}

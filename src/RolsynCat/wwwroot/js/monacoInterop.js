@@ -159,10 +159,9 @@ monacoInterop.registerMonacoProviders = async (dotNetObject) => {
      * @returns {Array} - 建议列表
      */
     async function getProvidersAsync(code, position) {
-        let suggestions = [];
+        let suggestions = module.suggestionsTab.slice();
         await dotNetObject.invokeMethodAsync('ProvideCompletionItems', code, position).then(result => {
             let res = JSON.parse(result);
-            suggestions = module.suggestionsTab.slice();
             for (let key in res) {
                 suggestions.push({
                     label: {
@@ -294,7 +293,6 @@ monacoInterop.quickFix = () => {
 //代码分享
 monacoInterop.copyText = module.copyText;
 
-//
 
 window.monacoInterop = monacoInterop;
 
