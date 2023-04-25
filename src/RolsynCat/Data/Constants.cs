@@ -17,6 +17,7 @@ class Program
         Console.WriteLine(""欢迎使用RoslynCat"");
     }
 }";
+		public static readonly string globalUsings = @"global using;";
 		public static MetadataReference[] DefaultMetadataReferences = new MetadataReference[]
 		{
 			MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),

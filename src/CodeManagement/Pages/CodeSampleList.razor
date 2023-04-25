@@ -1,0 +1,109 @@
+﻿@page "/"
+@page "/index"
+@using RoslynCat.SQL;
+
+@if (codeSamples != null) {
+    <h3>Code Samples</h3>
+
+    @if (codeSample != null) {
+        <div id="edit-form" style="@(edit ?"display: block;" :"display: none;")">
+            <form>
+                <div class="form-group">
+                    <label for="group">Group:</label>
+                    <InputSelect @bind-Value="@codeSample.Group" class="form-control">
+                        <option value="C#基础语法">C#基础语法</option>
+                        <option value="C#进阶技巧">C#进阶技巧</option>
+                        <option value="C#算法实现">C#算法实现</option>
+                    </InputSelect>
+                </div>
+                <div class="form-group">
+                    <label for="title">Title:</label>
+                    <input type="text" class="form-control" id="title" name="title" @bind-value="codeSample.Title">
+                </div>
+                <div class="form-group">
+                    <label for="code">Code:</label>
+                    <textarea class="form-control" id="code" name="code" @bind="@codeSample.Code"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="language">Language:</label>
+                    <input type="text" class="form-control" id="language" name="language" @bind-value="codeSample.Language">
+                </div>
+                <button type="submit" class="btn btn-primary" @onclick="() =>SaveEditForm(codeSample.Id)">Save</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => HideEditForm()">Cancel</button>
+            </form>
+        </div>
+    }
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Group</th>
+                <th>Title</th>
+                <th>Code</th>
+                <th>Language</th>
+                <th>Created At</th>
+                <th>Modified Date</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var codeSample in codeSamples) {
+                <tr>
+                    <td>@codeSample.Group</td>
+                    <td>@codeSample.Title</td>
+                    <td>@codeSample.Code</td>
+                    <td>@codeSample.Language</td>
+                    <td>@codeSample.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@codeSample.ModifiedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>
+                        <button type="button" class="btn btn-link" @onclick="() => ShowEditForm(codeSample.Id)">Edit</button>
+                        <button type="button" class="btn btn-link" @onclick="() => HandleDeleteClick(codeSample.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+     <Paging PageChanged="OnPageChanged" TotalCount="@codeSamples.Count" PageSize="10" />
+}
+else {
+    <div>Loading...</div>
+}
+
+@code {
+    [Inject]
+    private CodeSampleRepository CodeSampleService { get; set; }
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    private List<CodeSample> codeSamples;
+    private CodeSample codeSample;
+    private bool edit = false;
+
+    private void OnPageChanged(int pageNumber) {
+        codeSamples = CodeSampleService.GetPaged(pageNumber,10).Result;
+    }
+    protected override async Task OnInitializedAsync() {
+        codeSamples = await CodeSampleService.GetAll();
+    }
+
+    private async Task HandleDeleteClick(int id) {
+        await CodeSampleService.Remove(id);
+        codeSamples = await CodeSampleService.GetAll();
+    }
+    private async Task ShowEditForm(int codeSampleId) {
+        edit = true;
+        codeSample = await CodeSampleService.GetById(codeSampleId);
+    }
+    private async Task SaveEditForm(int codeSampleId) {
+        codeSample.ModifiedDate = DateTime.UtcNow;
+        int lin = await CodeSampleService.Update(codeSample);
+        if (lin>-1) {
+            edit = false;
+        }
+    }
+
+    private async Task HideEditForm() {
+        edit = false;
+    }
+}

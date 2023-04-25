@@ -1,5 +1,7 @@
 ﻿@page "/dropdown"
 @using System.Linq
+@using RoslynCat.SQL;
+@using SqlSugar;
 
 <div class="dropdown-container">
     <div class="dropdown-button" @onclick="ToggleDropdown">
@@ -24,11 +26,13 @@
 </div>
 
 @code {
+    [Inject] CodeSampleRepository CodeSample { get; set; }
+
     private bool IsDropdownVisible { get; set; }
     [Parameter]
     public EventCallback<Option> OptionSelectedCallback { get; set; }
     private List<Option> Options { get; set; } = new List<Option>
-                {
+                                        {
             new Option { Group = "C#基础", Title = "关键字" },
             new Option { Group = "C#基础", Title = "操作符" },
             new Option { Group = "C#基础", Title = "控制语句" },
@@ -46,7 +50,7 @@
     public class Option {
         public string Group { get; set; }
         public string Title { get; set; }
-        public string Value { get; set; }
+        public string Code { get; set; }
     }
 
     private void ToggleDropdown() {
@@ -56,5 +60,6 @@
     private async Task OptionSelected(Option option) {
         await OptionSelectedCallback.InvokeAsync(option);
         IsDropdownVisible = false;
+
     }
 }

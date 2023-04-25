@@ -15,6 +15,7 @@
 
 		public string GistId { get => _configuration["gist"]; }
 		public string OpenAI { get => _configuration["OpneAI"]; }
+		public string ConnectionString { get => _configuration.GetConnectionString("DbConnect"); }
 
 	}
 }
