@@ -293,7 +293,6 @@ monacoInterop.quickFix = () => {
 //代码分享
 monacoInterop.copyText = module.copyText;
 
-
 window.monacoInterop = monacoInterop;
 
 console.log("end")

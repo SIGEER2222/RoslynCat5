@@ -28,7 +28,6 @@
     <button type="submit" class="btn btn-primary">提交</button>
 </EditForm>
 
-
 @code {
 
     private EditContext editContext;
@@ -39,7 +38,7 @@
     protected override void OnInitialized() {
         codeSample = new CodeSample() {
                 Language = "C#",
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 Group = "C#基础语法",
             };
         editContext = new EditContext(codeSample);
@@ -49,13 +48,13 @@
     private async Task HandleValidSubmit() {
         if (codeSampleRepository.HaveTitle(codeSample.Title)) {
             errorMessage = $"{codeSample.Title}已经存在";
-            messageStore.Add(editContext.Field(nameof(CodeSample.Title)),errorMessage);
-            editContext.NotifyValidationStateChanged();
+            //messageStore.Add(editContext.Field(nameof(CodeSample.Title)),errorMessage);
+            //editContext.NotifyValidationStateChanged();
             return;
         }
         else {
             errorMessage = string.Empty;
-            codeSample.ModifiedDate = DateTime.UtcNow;
+            codeSample.ModifiedDate = DateTime.Now;
             await codeSampleRepository.Add(codeSample);
             addTitle = $"{codeSample.Title} 已成功添加";
         }

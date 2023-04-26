@@ -63,7 +63,7 @@
             }
         </tbody>
     </table>
-     <Paging PageChanged="OnPageChanged" TotalCount="@codeSamples.Count" PageSize="10" />
+    <Paging PageChanged="OnPageChanged" TotalCount="@codeSamples.Count" PageSize="10" />
 }
 else {
     <div>Loading...</div>
@@ -98,7 +98,7 @@ else {
     private async Task SaveEditForm(int codeSampleId) {
         codeSample.ModifiedDate = DateTime.UtcNow;
         int lin = await CodeSampleService.Update(codeSample);
-        if (lin>-1) {
+        if (lin > -1) {
             edit = false;
         }
     }

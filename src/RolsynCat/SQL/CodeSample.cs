@@ -24,8 +24,8 @@ namespace RoslynCat.SQL
         public string Language { get; set; }
 
         [SugarColumn(IsNullable = false,ColumnDataType = "datetime2(0)",ColumnDescription = "UTC时间")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
         [SugarColumn(IsNullable = false,ColumnDataType = "datetime2(0)",ColumnDescription = "UTC时间")]
-        public DateTime ModifiedDate { get; set; } = DateTime.UtcNow;
+        public DateTime ModifiedDate { get; set; } = DateTime.Now;
     }
 }
